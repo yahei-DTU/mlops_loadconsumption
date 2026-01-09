@@ -1,12 +1,17 @@
-FROM ghcr.io/astral-sh/uv:python3.12-alpine AS base
+# Base image
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+
+RUN apt update && \
+    apt install --no-install-recommends -y build-essential gcc && \
+    apt clean && rm -rf /var/lib/apt/lists/*
 
 COPY uv.lock uv.lock
 COPY pyproject.toml pyproject.toml
+COPY README.md README.md
+COPY src/ src/
 
-RUN uv sync --frozen --no-install-project
 
-COPY src src/
+WORKDIR /
+RUN uv sync --locked --no-cache --no-install-project
 
-RUN uv sync --frozen
-
-ENTRYPOINT ["uv", "run", "src/mlops_loadconsumption/train.py"]
+ENTRYPOINT ["uv", "run", "src/mlops_loadconsumption/data.py"]
