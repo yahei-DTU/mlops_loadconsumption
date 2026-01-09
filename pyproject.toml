@@ -18,8 +18,10 @@ classifiers = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "entsoe-py>=0.7.8",
     "fastapi==0.115.6",
     "numpy>=2.4.0",
+    "ipykernel>=7.1.0",
     "torch==2.6.0",
     "typer==0.15.1",
     "uvicorn==0.34.0",
