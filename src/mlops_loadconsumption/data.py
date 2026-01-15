@@ -7,11 +7,17 @@ import typer
 from torch.utils.data import Dataset
 import holidays
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
+import sys
 
-# Configure logger
+# Add configs folder to path
+configs_path = Path(__file__).resolve().parents[2] / 'configs'
+sys.path.insert(0, str(configs_path))
+
+from config import N_INPUT_TIMESTEPS, N_OUTPUT_TIMESTEPS, TRAIN_SIZE, VAL_SIZE, TEST_SIZE, API_KEY, COUNTRY
+
+# Configure logger AFTER importing config
 logger = logging.getLogger(__name__)
-
-
 
 class MyDataset(Dataset):
     """My custom dataset."""
@@ -21,6 +27,8 @@ class MyDataset(Dataset):
     default_end_date = pd.Timestamp('20250101', tz='UTC')
     root = Path(__file__).resolve().parents[2]
     default_data_path = root / "data"
+    n_input_timesteps = N_INPUT_TIMESTEPS
+    n_output_timesteps = N_OUTPUT_TIMESTEPS
 
     def __init__(self,
                  data_path: Path,
@@ -120,23 +128,18 @@ class MyDataset(Dataset):
         dayofweek = idx.dayofweek
         week = idx.isocalendar().week.astype(int)
         
-        logger.debug("Encoding hour features")
         self.processed_data['hour_sin'] = np.sin(2 * np.pi * hour / 24)
         self.processed_data['hour_cos'] = np.cos(2 * np.pi * hour / 24)
-        
-        logger.debug("Encoding day features")
+
         self.processed_data['day_sin'] = np.sin(2 * np.pi * day / 31)
         self.processed_data['day_cos'] = np.cos(2 * np.pi * day / 31)
-        
-        logger.debug("Encoding day of week features")
+
         self.processed_data['dayofweek_sin'] = np.sin(2 * np.pi * dayofweek / 7)
         self.processed_data['dayofweek_cos'] = np.cos(2 * np.pi * dayofweek / 7)
-        
-        logger.debug("Encoding week features")
+
         self.processed_data['week_sin'] = np.sin(2 * np.pi * week / 53)
         self.processed_data['week_cos'] = np.cos(2 * np.pi * week / 53)
-        
-        logger.debug("Encoding month features")
+
         self.processed_data['month_sin'] = np.sin(2 * np.pi * month / 12)
         self.processed_data['month_cos'] = np.cos(2 * np.pi * month / 12)
         
@@ -156,7 +159,7 @@ class MyDataset(Dataset):
         self.processed_data['is_holiday'] = pd.to_datetime(idx.date).isin(holidays_timestamps).astype(int)
         logger.info("Holiday feature added successfully")
 
-    def _split_data(self, train_size: float = 0.7, val_size: float = 0.15, test_size: float = 0.15) -> None:
+    def _split_data(self, train_size: float = TRAIN_SIZE, val_size: float = VAL_SIZE, test_size: float = TEST_SIZE) -> None:
         """
         Split processed data into train, validation, and test sets.
         
@@ -200,6 +203,63 @@ class MyDataset(Dataset):
         self.train_data.to_csv(splits_folder / 'train.csv')
         self.val_data.to_csv(splits_folder / 'val.csv')
         self.test_data.to_csv(splits_folder / 'test.csv')
+
+    def _create_sequences(self, data: np.ndarray) -> tuple:
+        """
+        Convert time series data into supervised learning format (X, y sequences).
+        
+        Args:
+            data: Input array of shape (n_samples, n_features)
+            
+        Returns:
+            X_tensor: Input sequences tensor
+            Y_tensor: Output sequences tensor
+        """
+        logger.info(f"Creating sequences with n_input={self.n_input_timesteps}, n_output={self.n_output_timesteps}")
+        
+        X_list, Y_list = [], []
+        
+        for i in range(len(data) - self.n_input_timesteps - self.n_output_timesteps + 1):
+            X = data[i:i + self.n_input_timesteps, :]  # Keep all features (multivariate)
+            y = data[i + self.n_input_timesteps:i + self.n_input_timesteps + self.n_output_timesteps, 0]  # Only load (first column)
+            
+            X_list.append(X)
+            Y_list.append(y)
+        
+        X_array = np.array(X_list)
+        Y_array = np.array(Y_list)
+        
+        X_tensor = tf.convert_to_tensor(X_array, dtype=tf.float32)
+        Y_tensor = tf.convert_to_tensor(Y_array, dtype=tf.float32)
+        
+        logger.info(f"Created {len(X_list)} sequences - X shape: {X_tensor.shape}, Y shape: {Y_tensor.shape}")
+        
+        return X_tensor, Y_tensor
+
+    def get_train_val_test_sequences(self) -> dict:
+        """
+        Create sequences for train, validation, and test sets.
+        
+        Returns:
+            Dictionary with train, val, test X and y tensors
+        """
+        logger.info("Creating sequences for all data splits")
+        
+        X_train, y_train = self._create_sequences(np.array(self.train_data))
+        X_val, y_val = self._create_sequences(np.array(self.val_data))
+        X_test, y_test = self._create_sequences(np.array(self.test_data))
+        
+        sequences = {
+            'X_train': X_train,
+            'y_train': y_train,
+            'X_val': X_val,
+            'y_val': y_val,
+            'X_test': X_test,
+            'y_test': y_test
+        }
+        
+        logger.info("Sequences created successfully")
+        return sequences
 
     def preprocess(self) -> None:
         """Preprocess the raw data and save it to the processed_data folder."""

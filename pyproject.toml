@@ -28,6 +28,8 @@ dependencies = [
     "uvicorn==0.34.0",
     "holidays>=0.88",
     "scikit-learn>=1.8.0",
+    "tensorflow>=2.20.0",
+    "plotly>=6.5.2",
 ]
 
 [dependency-groups]
