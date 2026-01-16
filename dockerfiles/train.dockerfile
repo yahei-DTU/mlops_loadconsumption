@@ -11,4 +11,4 @@ RUN uv sync --frozen
 
 ENTRYPOINT ["uv", "run", "src/mlops_loadconsumption/train.py"]
 
-ENTRYPOINT ["uv", "run", "src/mlops_loadconsumption/train.py"]
+ENTRYPOINT ["uv", "run", "src/mlops_loadconsumption/train.py"] # Adjust the path as necessary
