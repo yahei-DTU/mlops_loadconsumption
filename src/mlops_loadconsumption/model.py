@@ -11,7 +11,8 @@ sys.path.insert(0, str(configs_path))
 from config import N_FEATURES, N_INPUT_TIMESTEPS, N_OUTPUT_TIMESTEPS
 
 class Model(nn.Module):
-    def __init__(self, n_features=N_FEATURES, n_timesteps=N_INPUT_TIMESTEPS, n_outputs=N_OUTPUT_TIMESTEPS):
+    """Convolutional Neural Network for Time Series Prediction."""
+    def __init__(self, n_features: int = N_FEATURES, n_timesteps: int = N_INPUT_TIMESTEPS, n_outputs: int = N_OUTPUT_TIMESTEPS):
         super(Model, self).__init__()
         self.n_features = n_features
         self.n_timesteps = n_timesteps
@@ -27,7 +28,7 @@ class Model(nn.Module):
         fc_input_size = 15 * pooled_length
         self.fc_final = nn.Linear(fc_input_size, n_outputs)
     
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.bn1(self.conv1(x))
         x = self.bn2(self.conv2(x))
         x = self.pool(x)
