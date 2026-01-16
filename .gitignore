@@ -1,5 +1,10 @@
 docs/site/
-data/*
+# Ignore actual data
+/data/**
+
+# But allow DVC metadata files
+!/data/**/*.dvc
+
 # test cache
 manual_test/
 
