@@ -200,6 +200,7 @@ class MyDataset(Dataset):
     def _save_splits(self) -> None:
         """Save train, validation, and test sets to CSV files."""
         splits_folder = self.data_path / 'processed_data' / 'splits'
+        splits_folder.mkdir(parents=True, exist_ok=True)
         self.train_data.to_csv(splits_folder / 'train.csv')
         self.val_data.to_csv(splits_folder / 'val.csv')
         self.test_data.to_csv(splits_folder / 'test.csv')
