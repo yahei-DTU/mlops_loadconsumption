@@ -529,7 +529,7 @@ threadpoolctl==3.6.0
     # via scikit-learn
 tomlkit==0.14.0
     # via dvc
-torch==2.6.0+cpu
+torch==2.6.0
     # via mlops-loadconsumption (pyproject.toml)
 tornado==6.5.4
     # via
