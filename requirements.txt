@@ -75,11 +75,7 @@ click-plugins==1.1.1.2
 click-repl==0.3.0
     # via celery
 colorama==0.4.6
-    # via
-    #   click
-    #   dvc
-    #   ipython
-    #   tqdm
+    # via dvc
 comm==0.2.3
     # via ipykernel
 configobj==5.0.9
@@ -352,6 +348,8 @@ pathspec==0.12.1
     # via
     #   dvc
     #   scmrepo
+pexpect==4.9.0
+    # via ipython
 pillow==12.1.0
     # via tensorboard
 platformdirs==4.5.1
@@ -387,6 +385,8 @@ psutil==7.2.1
     #   dvc
     #   flufl-lock
     #   ipykernel
+ptyprocess==0.7.0
+    # via pexpect
 pure-eval==0.2.3
     # via stack-data
 pyasn1==0.6.2
@@ -439,8 +439,6 @@ pytz==2025.2
     # via
     #   entsoe-py
     #   pandas
-pywin32==311
-    # via dvc-task
 pyyaml==6.0.3
     # via omegaconf
 pyzmq==27.1.0
@@ -550,7 +548,7 @@ traitlets==5.14.3
     #   jupyter-client
     #   jupyter-core
     #   matplotlib-inline
-typer==0.15.1
+typer==0.21.1
     # via
     #   mlops-loadconsumption (pyproject.toml)
     #   gto
@@ -577,7 +575,6 @@ tzdata==2025.3
     # via
     #   kombu
     #   pandas
-    #   tzlocal
 tzlocal==5.3.1
     # via celery
 uritemplate==4.2.0
