@@ -9,9 +9,12 @@ on:
       - main
 
 jobs:
-  format:
-    name: Check code formatting
+  lint:
+    name: Code linting
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
 
     steps:
       - name: Checkout code
@@ -28,12 +31,11 @@ jobs:
           python -m pip install -U pip setuptools wheel
           pip install -r requirements.txt
           pip install -r requirements_dev.txt
-          pip list
 
       - name: ruff check
         run: |
           ruff check .
 
-      - name: ruff format
+      - name: mypy check
         run: |
-          ruff format .
+          mypy .
