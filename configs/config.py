@@ -21,5 +21,5 @@ VAL_SIZE = 0.15
 TEST_SIZE = 0.15
 
 # API configuration
-API_KEY = '1ec78127-e12b-4cb2-a9fb-1258e4d5622a'
-COUNTRY = 'DK'
+API_KEY = "1ec78127-e12b-4cb2-a9fb-1258e4d5622a"
+COUNTRY = "DK"

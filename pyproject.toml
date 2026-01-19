@@ -18,6 +18,7 @@ classifiers = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "dvc-gs>=3.0.2",
     "entsoe-py>=0.7.8",
     "fastapi==0.115.6",
     "holidays>=0.88",
