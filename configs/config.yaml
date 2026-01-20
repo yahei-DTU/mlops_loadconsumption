@@ -1,0 +1,26 @@
+defaults:
+  - _self_
+
+data:
+  n_features: 12
+  n_input_timesteps: 96
+  n_output_timesteps: 24
+
+model:
+  name: load_consumption_model
+  path: models
+
+training:
+  batch_size: 32
+  learning_rate: 0.001
+  epochs: 20
+  early_stopping_patience: 5
+
+split:
+  train_size: 0.7
+  val_size: 0.15
+  test_size: 0.15
+
+api:
+  key: 1ec78127-e12b-4cb2-a9fb-1258e4d5622a
+  country: DK

@@ -2,6 +2,12 @@ docs/site/
 # Ignore actual data
 /data/**
 
+# Ignore ruff cache
+.ruff_cache/
+
+# Ignore hydra files
+outputs/
+
 # But allow DVC metadata files
 !/data/**/*.dvc
 
