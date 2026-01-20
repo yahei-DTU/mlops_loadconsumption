@@ -77,6 +77,8 @@ mkdocstrings==1.0.1
     # via mkdocstrings-python
 mkdocstrings-python==1.12.2
     # via mlops-loadconsumption (pyproject.toml:dev)
+mypy==1.19.1
+    # via mlops-loadconsumption (pyproject.toml:dev)
 nodeenv==1.10.0
     # via pre-commit
 packaging==25.0

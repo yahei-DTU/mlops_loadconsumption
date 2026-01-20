@@ -44,6 +44,7 @@ dev = [
     "pytest==8.3.4",
     "ruff==0.14.13",
     "mkdocstrings-python==1.12.2",
+    "mypy>=1.19.1",
 ]
 
 
@@ -62,6 +63,10 @@ explicit = true
 
 [tool.ruff]
 line-length = 120
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
 
 [tool.coverage.run]
 omit = ["tests/*"]
