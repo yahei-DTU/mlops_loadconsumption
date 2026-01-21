@@ -81,11 +81,11 @@ class MyDataset(Dataset):
         """Return the length of the dataset."""
         pass
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> pd.Series:
         """Return a given sample from the dataset."""
         pass
 
-    def _fetch_api_data(self):
+    def _fetch_api_data(self) -> None:
         """Pull load data from Denmark with specified timestamps."""
         logger.info(f"Fetching load data for {self.country} from {self.start} to {self.end}...")
 
@@ -107,7 +107,7 @@ class MyDataset(Dataset):
             logger.error(f"Failed to fetch data from ENTSO-E API: {str(e)}")
             raise RuntimeError(f"Failed to fetch data from ENTSO-E API: {str(e)}")
 
-    def _resample_to_hourly(self):
+    def _resample_to_hourly(self) -> None:
         """Resample to hourly and convert to UTC."""
         logger.info("Resampling data to hourly frequency")
         hourly = self.raw_data.resample('h').mean()
@@ -116,7 +116,7 @@ class MyDataset(Dataset):
         self.hourly_data = hourly
         logger.info(f"Resampled to {len(self.hourly_data)} hours")
 
-    def _handle_missing_values(self):
+    def _handle_missing_values(self) -> None:
         """Interpolate missing values."""
         logger.info("Handling missing values")
 
@@ -128,7 +128,7 @@ class MyDataset(Dataset):
         else:
             logger.debug("No missing values found")
 
-    def _trigonometric_encoding(self):
+    def _trigonometric_encoding(self) -> None:
         """Add trigonometric encoding of temporal features."""
         logger.info("Adding temporal features with trigonometric encoding")
 
@@ -163,7 +163,7 @@ class MyDataset(Dataset):
         temporal_features = [c for c in self.processed_data.columns if 'sin' in c or 'cos' in c]
         logger.info(f"Added {len(temporal_features)} temporal features: {temporal_features}")
 
-    def _add_holiday_feature(self):
+    def _add_holiday_feature(self) -> None:
         """Add holiday indicator feature."""
         logger.info("Adding holiday feature")
 

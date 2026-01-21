@@ -2,12 +2,12 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 from pathlib import Path
-from src.mlops_loadconsumption.model import Model
-from src.mlops_loadconsumption.data import MyDataset
+from mlops_loadconsumption.model import Model
+from mlops_loadconsumption.data import MyDataset
 import logging
 import pickle
 from sklearn.preprocessing import StandardScaler
-from src.mlops_loadconsumption.visualize import plot_training_history
+from mlops_loadconsumption.visualize import plot_training_history
 import hydra
 from omegaconf import DictConfig
 
