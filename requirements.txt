@@ -127,7 +127,7 @@ entsoe-py==0.7.8
     # via mlops-loadconsumption (pyproject.toml)
 executing==2.2.1
     # via stack-data
-fastapi==0.115.6
+fastapi==0.128.0
     # via mlops-loadconsumption (pyproject.toml)
 filelock==3.20.3
     # via
