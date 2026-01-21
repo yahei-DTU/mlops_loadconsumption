@@ -1,0 +1,24 @@
+steps:
+  # Step 1: Build the Docker image
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Build container image'
+  args: [
+    'build',
+    '.',
+    '-t',
+    'europe-west1-docker.pkg.dev/$PROJECT_ID/first-try/my-image:latest',
+    '-f',
+    'dockerfiles/train.dockerfile'
+  ]
+
+  # Step 2: Push the image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Push container image'
+  args: [
+    'push',
+    'europe-west1-docker.pkg.dev/$PROJECT_ID/first-try/my-image:latest'
+  ]
+options:
+  logging: CLOUD_LOGGING_ONLY
+substitutions:
+  _IMAGE_NAME: 'my_image'
