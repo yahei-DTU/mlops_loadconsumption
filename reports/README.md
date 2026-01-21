@@ -367,8 +367,8 @@ We also filled out the `configs/` directory with configuration constants and the
 > *training docker image: `docker run trainer:latest lr=1e-3 batch_size=64`. Link to docker file: <weblink>*
 >
 > Answer:
+In our project, we used Docker to create a consistent, isolated environment for model training, ensuring that all dependencies for our _'train.py'_ script were correctly configured regardless of the host system. We organized our project by storing our configuration in a _'dockerfiles/train.dockerfile'_. To run the experiment, I first built the image from the _'train.dockerfile'_ and then launched a container to execute the training logic. To build the image, we run: _docker build --platform linux/arm64 -f ./dockerfiles/train.dockerfile . -t train:latest_, and to build the container to execute 'train.py', we run: _docker run --platform linux/arm64 train:latest_. This approach allowed us to package the exact versions of libraries like PyTorch or TensorFlow, preventing version conflicts. Link to docker file: <https://github.com/yahei-DTU/mlops_loadconsumption/blob/main/dockerfiles/train.dockerfile>
 
---- question 15 fill here ---
 
 ### Question 16
 
@@ -605,3 +605,4 @@ We also filled out the `configs/` directory with configuration constants and the
 > Answer:
 
 --- question 31 fill here ---
+
