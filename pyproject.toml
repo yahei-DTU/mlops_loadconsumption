@@ -16,35 +16,33 @@ classifiers = [
   "Programming Language :: Python :: 3",
 ]
 readme = "README.md"
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.12"
 dependencies = [
     "entsoe-py>=0.7.8",
-    "fastapi==0.128.0",
-    "numpy>=2.4.0",
+    "fastapi==0.115.6",
+    "numpy>=2.3.0,<2.4.0",
     "ipykernel>=7.1.0",
-    "numpy>=2.4.0",
-    "torch==2.9.1",
-    "typer==0.21.1",
+    "torch==2.6.0",
+    "typer==0.15.1",
     "uvicorn==0.34.0",
     "holidays>=0.88",
     "scikit-learn>=1.8.0",
     "tensorflow>=2.20.0",
     "plotly>=6.5.2",
-    "google-api-python-client>=2.188.0",
-    "dvc-gs>=3.0.2",
+    "hydra-core>=1.3.0",
 ]
 
 [dependency-groups]
 dev = [
-    "coverage==7.13.1",
+    "coverage==7.6.9",
     "invoke==2.2.0",
-    "mkdocs-material==9.7.1",
+    "mkdocs-material==9.4.6",
     "mkdocs==1.6.1",
     "pre-commit==4.1.0",
     "pytest==8.3.4",
-    "ruff==0.14.13",
+    "ruff==0.1.3",
     "mkdocstrings-python==1.12.2",
-    "mypy>=1.19.1",
+    "httpx>=0.24.0",
 ]
 
 
@@ -63,10 +61,6 @@ explicit = true
 
 [tool.ruff]
 line-length = 120
-
-[tool.mypy]
-python_version = "3.12"
-strict = true
 
 [tool.coverage.run]
 omit = ["tests/*"]
