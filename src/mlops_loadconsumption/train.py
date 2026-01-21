@@ -10,7 +10,17 @@ from sklearn.preprocessing import StandardScaler
 from mlops_loadconsumption.visualize import plot_training_history
 import hydra
 from omegaconf import DictConfig
+import wandb
+from dotenv import load_dotenv
+import os
 
+# Load environment variables
+load_dotenv()
+WANDB_PROJECT_NAME = os.getenv("WANDB_PROJECT", "mlops-loadconsumption")
+WANDB_ENTITY_NAME = os.getenv("WANDB_ENTITY", None)
+
+
+# Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -44,31 +54,58 @@ def load_or_create_sequences(cfg: DictConfig, data_path: Path, sequences_path: P
         logger.info(f"Sequences saved to {sequences_path}")
         return sequences
 
-def train_epoch(model, train_loader, optimizer, criterion, device):
-    """Train for one epoch"""
+def compute_regression_accuracy(predictions: torch.Tensor, targets: torch.Tensor, tolerance: float = 0.1) -> float:
+    """Fraction of predictions within a relative tolerance of targets."""
+    rel_error = torch.abs(predictions - targets) / (torch.abs(targets) + 1e-8)
+    within_tol = (rel_error <= tolerance).float()
+    return within_tol.mean().item()
+
+
+def train_epoch(
+    model: nn.Module,
+    train_loader: DataLoader,
+    optimizer: torch.optim.Optimizer,
+    criterion: nn.Module,
+    device: torch.device,
+    start_step: int,
+) -> tuple[float, int]:
+    """Train for one epoch and log per-step metrics to wandb."""
     model.train()
     total_loss = 0.0
+    global_step = start_step
 
     for batch_idx, (X, y) in enumerate(train_loader):
         X, y = X.to(device), y.to(device)
 
-        # Forward pass
         optimizer.zero_grad()
         outputs = model(X)
         loss = criterion(outputs, y)
+        acc = compute_regression_accuracy(outputs.detach(), y.detach())
 
-        # Backward pass
         loss.backward()
         optimizer.step()
 
         total_loss += loss.item()
+        global_step += 1
+
+        # Per-step logging
+        wandb.log(
+            {
+                "train/loss": loss.item(),
+                "train/accuracy": acc,
+                "train/step": global_step,
+            },
+            step=global_step,
+        )
 
         if batch_idx % 10 == 0:
-            logger.info(f"Batch {batch_idx}/{len(train_loader)}, Loss: {loss.item():.4f}")
+            logger.info(
+                f"Batch {batch_idx}/{len(train_loader)}, Loss: {loss.item():.4f}, Acc: {acc:.4f}"
+            )
 
-    return total_loss / len(train_loader)
+    return total_loss / len(train_loader), global_step
 
-def validate(model, val_loader, criterion, device):
+def validate(model: nn.Module, val_loader: DataLoader, criterion: nn.Module, device: torch.device) -> float:
     """Validate model"""
     model.eval()
     total_loss = 0.0
@@ -83,8 +120,11 @@ def validate(model, val_loader, criterion, device):
     return total_loss / len(val_loader)
 
 @hydra.main(version_base=None, config_path="../../configs", config_name="config")
-def main(cfg: DictConfig):
+def main(cfg: DictConfig) -> None:
     """Main training loop"""
+    # Initialize wandb
+    wandb.init(project=WANDB_PROJECT_NAME, entity=WANDB_ENTITY_NAME, config=dict(cfg), mode="online")
+
     # Setup paths
     project_root = Path(__file__).resolve().parents[2]
     data_path = project_root / "data"
@@ -170,8 +210,23 @@ def main(cfg: DictConfig):
         n_outputs=cfg.data.n_output_timesteps
     ).to(device)
 
+    param_count = sum(p.numel() for p in model.parameters())
     logger.info(f"Model created on device: {device}")
-    logger.info(f"Total parameters: {sum(p.numel() for p in model.parameters())}")
+    logger.info(f"Total parameters: {param_count}")
+
+    # Log key hyperparameters/model info
+    wandb.config.update(
+        {
+            "model/parameter_count": param_count,
+            "model/n_features": cfg.data.n_features,
+            "model/n_timesteps": cfg.data.n_input_timesteps,
+            "model/n_outputs": cfg.data.n_output_timesteps,
+            "training/batch_size": cfg.training.batch_size,
+            "training/learning_rate": cfg.training.learning_rate,
+            "training/epochs": cfg.training.epochs,
+        },
+        allow_val_change=True,
+    )
 
     # Loss and optimizer
     criterion = nn.MSELoss()
@@ -186,14 +241,26 @@ def main(cfg: DictConfig):
     train_losses = []
     val_losses = []
 
+    global_step = 0
+
     for epoch in range(cfg.training.epochs):
-        train_loss = train_epoch(model, train_loader, optimizer, criterion, device)
+        train_loss, global_step = train_epoch(
+            model, train_loader, optimizer, criterion, device, global_step
+        )
         val_loss = validate(model, val_loader, criterion, device)
 
         train_losses.append(train_loss)
         val_losses.append(val_loss)
 
         logger.info(f"Epoch {epoch+1}/{cfg.training.epochs} - Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+
+        # Log metrics to wandb
+        wandb.log({
+            "epoch": epoch + 1,
+            "train_loss": train_loss,
+            "val_loss": val_loss,
+            "learning_rate": optimizer.param_groups[0]['lr']
+        })
 
         # Learning rate scheduling
         scheduler.step(val_loss)
@@ -216,6 +283,7 @@ def main(cfg: DictConfig):
     plot_training_history(train_losses, val_losses, plot_path)
 
     logger.info("Training completed!")
+    wandb.finish()
 
 if __name__ == "__main__":
     main()
