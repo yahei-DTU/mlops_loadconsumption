@@ -2,6 +2,9 @@ docs/site/
 # Ignore actual data
 /data/**
 
+# wandb files
+wandb/
+
 # Ignore ruff cache
 .ruff_cache/
 
