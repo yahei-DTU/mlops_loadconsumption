@@ -285,7 +285,7 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 10 fill here ---
+We did make use of DVC in the following way: instead of just letting our Google Cloud bucket be a "folder in the sky", we used it to track the exact version of the electricity data we pulled from the ENTSO-E API. Because that API data can change or get updated by utility companies, we needed a way to lock it down to ensure our experiments remained consistent. In the end, it helped us in three ways: 1. We used `dvc status` to spot API data updates, which told us if we were training on the same data or if the provider had sent us new information. 2. It helped us control the preprocessing part of our pipeline by ensuring that our raw files and processed split data always aligned with the specific version of the code we were running. 3. It allowed us to time-travel because if a new data update ever broke our model, we could simply jump back to an older Git commit where that `data.dvc` file pointed and run `dvc pull`to get the exact data that worked before.
 
 ### Question 11
 
@@ -321,7 +321,7 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
-We used Hydra to keep track of hyperparameter tuning. We stored the default settings in the 'config.yaml' file that ensured every experiment was reproducible. By integrating Hydra into 'train.py', we could train with the standard defaults or perform adjustments via the command for hyper-parameter tuning. To run with default settings: _python src/models/train.py_, and to launch a custom experiment using uv: _uv run train.py batch_size=256 early_stopping_patience=8_
+We used Hydra to keep track of hyperparameter tuning. We stored the default settings in the `config.yaml` file which ensured every experiment was reproducible. By integrating Hydra into `train.py`, we could train with the standard defaults or perform adjustments via the command for hyper-parameter tuning. To run with default settings via `python src/models/train.py`, and to launch a custom experiment using `uv run train.py batch_size=256 early_stopping_patience=8`.
 
 ### Question 13
 
@@ -368,7 +368,7 @@ We used Hydra to keep track of hyperparameter tuning. We stored the default sett
 >
 > Answer:
 
-In our project, we used Docker to create a consistent, isolated environment for model training, ensuring that all dependencies for our _'train.py'_ script were correctly configured regardless of the host system. We organized our project by storing our configuration in a _'dockerfiles/train.dockerfile'_. To run the experiment, we first built the image from the _'train.dockerfile'_ and then launched a container to execute the training logic. To build the image, we run: _docker build --platform linux/arm64 -f ./dockerfiles/train.dockerfile . -t train:latest_, and to build the container to execute 'train.py', we run: _docker run --platform linux/arm64 train:latest_. This approach allowed us to package the exact versions of libraries like PyTorch or TensorFlow, preventing version conflicts. Link to docker file: <https://github.com/yahei-DTU/mlops_loadconsumption/blob/main/dockerfiles/train.dockerfile>
+In our project, we used Docker to create a consistent and isolated environment for model training, ensuring that all dependencies for our `train.py` script were correctly configured regardless of the host system. We organized our project by storing our configuration in a `dockerfiles/train.dockerfile`. To run the experiment, we first built the image from the `train.dockerfile` and then launched a container to execute the training. To build the image, we run: `docker build --platform linux/arm64 -f ./dockerfiles/train.dockerfile . -t train:latest`. And then we start the image and run `train.py` via `docker run --platform linux/arm64 train:latest`. This approach allowed us to package the exact versions of libraries like PyTorch or TensorFlow, preventing version conflicts. Link to docker file: <https://github.com/yahei-DTU/mlops_loadconsumption/blob/main/dockerfiles/train.dockerfile>
 
 
 ### Question 16
@@ -606,5 +606,6 @@ In our project, we used Docker to create a consistent, isolated environment for 
 > Answer:
 
 --- question 31 fill here ---
+
 
 
