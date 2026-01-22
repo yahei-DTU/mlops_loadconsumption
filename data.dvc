@@ -1,6 +1,46 @@
 outs:
-- md5: 30f5ade976fee77664e39244d558622f.dir
-  size: 89242233
-  nfiles: 6
-  hash: md5
+- hash: md5
   path: data
+  files:
+  - relpath: processed_data/DK_load_processed.csv
+    md5: e577d59eef6653416f4fa242940cdedf
+    size: 3890773
+    cloud:
+      remote_storage:
+        etag: 08a2f9aab7bc9f92031001
+        version_id: '1769096071527586'
+  - relpath: processed_data/sequences.pkl
+    md5: 2311410330167cca5c0efcf612f30005
+    size: 80848190
+    cloud:
+      remote_storage:
+        etag: 08b4c5f0b5bc9f92031001
+        version_id: '1769096068473524'
+  - relpath: processed_data/splits/test.csv
+    md5: 16ee6362bbd16403323989b19f3307a8
+    size: 581263
+    cloud:
+      remote_storage:
+        etag: 08d28690b6bc9f92031001
+        version_id: '1769096068989778'
+  - relpath: processed_data/splits/train.csv
+    md5: 308d19b8b06131e63722d7c0209fd49e
+    size: 2724953
+    cloud:
+      remote_storage:
+        etag: 08fefcd9b6bc9f92031001
+        version_id: '1769096070200958'
+  - relpath: processed_data/splits/val.csv
+    md5: 26d7903c1ca6d81862fcb7718e9724fd
+    size: 584793
+    cloud:
+      remote_storage:
+        etag: 08ebd78fb6bc9f92031001
+        version_id: '1769096068983787'
+  - relpath: raw_data/DK_load_raw.csv
+    md5: 607b0b2cdb124cfe5f0dfe034424205d
+    size: 612261
+    cloud:
+      remote_storage:
+        etag: 08d0ef8eb6bc9f92031001
+        version_id: '1769096068970448'
