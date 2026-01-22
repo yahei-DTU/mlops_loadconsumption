@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "mlops_loadconsumption"
 version = "0.0.1"
-description = "TBD"
+description = "Prediction of load consumption using CNN"
 authors = [
   { name = "yahei-DTU", email = "your@email.com" },
 ]
@@ -42,9 +42,10 @@ dev = [
     "mkdocs==1.6.1",
     "pre-commit==4.1.0",
     "pytest==8.3.4",
-    "ruff==0.1.3",
+    "ruff==0.14.13",
     "mkdocstrings-python==1.12.2",
     "httpx>=0.24.0",
+    "pathspec<0.12",
 ]
 
 
