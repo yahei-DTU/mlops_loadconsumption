@@ -748,7 +748,7 @@ Instead of a figure, which we don't have time for anymore, we make a list of ser
 
 We can identify some main challenges:
 
-* **Google Cloud Platform**: We spent a lot of time debugging errors coming from the usage of the cloud. We didn't manage to deploy the api on the cloud due to limited time and continuosly getting errors when trying to run it.
+* **Google Cloud Platform**: its usage  was not successful on ouy end, leading to many failures in our attempts to train the model.
 
 * **ENTSOE-py API**: The api from entsoe-py had a bug that was discovered, ironically, on the submission day. The bug was related to a typo in the capitalization of the timezone for the retrieval of the electricity load data. We managed to find and correct that bug with a patch (in the first lines of data.py). After the course, we will open a PR to the entsoe-py library and make our own contribution there.
 
@@ -780,14 +780,9 @@ We can identify some main challenges:
   * General code formatting adjustments
 
 * Student `yahei` contributed with:
-  * Setting up workflows
-  * Writing integration tests
-  * Hydra configuration setup
   * Setting up Weights and Bias
-  * DVC on Cloud Storage
-  * Docker images on Artifactory Registry
-  * API deployment with Cloud Run
-
+  * Setting up Google Cloud infrastructure
+  * Prepared the workflows
 
 * Mainly together we have:
   * Debugged code
