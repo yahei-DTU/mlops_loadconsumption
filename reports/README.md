@@ -97,7 +97,7 @@ will check the repositories and the code to verify your answers.
 
 ### Week 3
 
-* [ ] Check how robust your model is towards data drifting (M27)
+* [x] Check how robust your model is towards data drifting (M27)
 * [ ] Setup collection of input-output data from your deployed application (M27)
 * [ ] Deploy to the cloud a drift detection API (M27)
 * [ ] Instrument your API with a couple of system metrics (M28)
@@ -780,9 +780,13 @@ We can identify some main challenges:
   * General code formatting adjustments
 
 * Student `yahei` contributed with:
+  * Setting the workflows
+  * Setting up hydra
   * Setting up Weights and Bias
-  * Setting up Google Cloud infrastructure
-  * Prepared the workflows
+  * Setting up Cloud Storage and dvc
+  * Setting up Cloud Artifact Registry for docker images
+  * Could Run of container processes
+
 
 * Mainly together we have:
   * Debugged code
