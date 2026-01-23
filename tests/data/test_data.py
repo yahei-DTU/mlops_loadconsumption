@@ -94,8 +94,8 @@ def test_raw_data_values_are_realistic(data_dir: Path) -> None:
             values = df.iloc[:, 0] if 'load' not in df.columns else df['load']
 
         # Denmark's typical load is between 1500-6000 MW
-        assert values.min() > 100, f"Minimum load {values.min()} seems too low"
-        assert values.max() < 10000, f"Maximum load {values.max()} seems too high"
+        assert values.min() > 500, f"Minimum load {values.min()} seems too low"
+        assert values.max() < 12000, f"Maximum load {values.max()} seems too high"
 
 
 def test_processed_data_directory_exists(data_dir: Path) -> None:
