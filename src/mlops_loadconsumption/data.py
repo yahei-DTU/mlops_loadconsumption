@@ -2,13 +2,29 @@ from pathlib import Path
 import logging
 import numpy as np
 import pandas as pd
-from entsoe import EntsoePandasClient
 from torch.utils.data import Dataset
 import holidays
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 import hydra
 from omegaconf import DictConfig
+
+
+
+def patch_entsoe():
+    path = Path(".venv/Lib/site-packages/entsoe/entsoe.py")
+    if not path.exists():
+        return
+ 
+    text = path.read_text(encoding="utf-8")
+    if "tz='europe/amsterdam'" in text:
+        text = text.replace("tz='europe/amsterdam'", "tz='Europe/Amsterdam'")
+        path.write_text(text, encoding="utf-8")
+        print("Patched entsoe.py")
+ 
+patch_entsoe()
+
+from entsoe import EntsoePandasClient
 
 # Configure logger
 logger = logging.getLogger(__name__)
