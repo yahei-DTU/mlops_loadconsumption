@@ -134,7 +134,7 @@ Group 25
 >
 > Answer:
 
-s252605, s171204, 
+s252605, s171204, s202390, 
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -148,13 +148,11 @@ s252605, s171204,
 >
 > Answer:
 
-### Question 3
-
 Yes, we used a couple of open-source packages beyond the core course material:
 
 1. **entsoe-py**: A Python wrapper for the ENTSO-E API to automatically download hourly electricity load data for Denmark, which was critical for our data collection phase.
 
-2. **Plotly**: For interactive data visualization instead of just Matplotlib, helping us better present training results and model analysis.
+2. **Plotly (###############NOT SURE TO ADD THIS################### )**: For interactive data visualization instead of just Matplotlib, helping us better present training results and model analysis.
 
 These packages complemented the course material by enabling efficient data collection and better visualization for stakeholder communication.
 
@@ -176,7 +174,7 @@ These packages complemented the course material by enabling efficient data colle
 >
 > Answer:
 
-We managed dependencies using `uv` and maintained a `pyproject.toml` file that specifies all project dependencies with pinned versions. This approach ensures reproducibility across team members and environments.
+We used `uv` for managing our dependencies and virtual environment. We manteined a `pyproject.toml` file that specifies all project dependencies with pinned versions. This approach ensures reproducibility across team members and environments.
 
 For a new team member to get an exact copy of our environment, they would:
 
@@ -185,9 +183,9 @@ For a new team member to get an exact copy of our environment, they would:
 3. Run `uv sync` in the project root directory, which creates a virtual environment and installs all dependencies specified in `pyproject.toml` and locked in `uv.lock`
 4. Activate the environment: `source .venv/bin/activate`
 
-The `uv.lock` file ensures that exact versions of all dependencies (including transitive dependencies) are installed, preventing version conflicts or "works on my machine" issues. We also used Python 3.12+ as specified in `requires-python = ">=3.12"` in the `pyproject.toml`.
+The `uv.lock` file ensures that exact versions of all dependencies (including transitive dependencies) are installed. In case the command `uv sync` returns errors concerning the `uv.lock` file, please remove the `uv.lock` file via `rm uv.lock` and then run `uv sync`.
 
-This approach is superior to `requirements.txt` because it provides better dependency resolution and handles both main and development dependencies through dependency groups in the same file.
+We used Python 3.12+ as specified in `requires-python = ">=3.12"` in the `pyproject.toml`.
 
 ### Question 5
 
@@ -205,7 +203,7 @@ This approach is superior to `requirements.txt` because it provides better depen
 
 From the cookiecutter template, we filled out the `src/mlops_loadconsumption/` folder with `data.py`, `model.py`, `train.py`, `visualize.py`, and `api.py` modules. The `data.py` module handles data fetching from the ENTSO-E API and preprocessing. The `model.py` contains our Conv1d neural network architecture, while `train.py` implements the training pipeline with validation and early stopping. We added a `visualize.py` module for interactive plotting using Plotly, and an `api.py` module that creates a FastAPI application for model inference.
 
-We also filled out the `configs/` directory with configuration constants and the `dockerfiles/` folder with containerization files. Additionally, we set up GitHub Actions workflows in `.github/workflows/` for continuous integration.
+We also filled out the `configs/` directory with Hydra configuration files and the `dockerfiles/` folder with containerization files. Additionally, we set up GitHub Actions workflows in `.github/workflows/` for continuous integration, including unit tests, integration tests, data validation, and linting workflows.
 
 
 ### Question 6
@@ -221,7 +219,37 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 6 fill here ---
+Linting, formatting and pre-commit:
+
+* We used Ruff (version 0.1.3) for both linting and formatting, configured with a 120-character line length in `pyproject.toml`.
+
+* We set up pre-commit hooks that automatically check for trailing whitespace, YAML validation, and large files before each commit.
+
+Typing and docs:
+
+* We implemented type hints for function parameters and return types throughout the codebase.
+
+  * In `data.py`, methods include type annotations like def `__init__(self, n_input_timesteps: int, ...) -> None:`.
+
+  * In `model.py`, the forward method is annotated as `def forward(self, x: torch.Tensor) -> torch.Tensor:`.
+
+  * In `api.py`, we used Pydantic models `(PredictionRequest, PredictionResponse)` for API schema validation with type safety.
+
+* For documentation, we included docstrings for all classes and key methods.
+
+  * The `MyDataset.__init__` has comprehensive docstrings explaining all parameters with their types and purposes.
+  
+  * The `Model` class includes docstrings describing the architecture.
+  
+  * The API endpoints in `api.py` have detailed docstrings explaining functionality, arguments, and return types.
+
+These concepts are crucial in larger projects because:
+
+1. Type hints catch errors early during development and provide better IDE autocomplete support
+
+2. Ruff formatting reduces merge conflicts, making code reviews focused on logic rather than style
+
+3. Pre-commit hooks enforce quality standards automatically
 
 ## Version control
 
@@ -240,7 +268,15 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 7 fill here ---
+In total, we implemented approximately 39 tests across multiple test files. We primarily tested:
+
+* Data processing (test_data.py): 22 tests covering data directory existence, raw data validation, processed data quality, and train/val/test splits integrity
+
+* Model architecture and training (test_model.py): 3 integration tests verifying that training reduces loss, the model can overfit small batches (sanity check), and gradients flow correctly through all parameters
+
+* Unit tests: 9 tests covering dataset imports, resampling logic, missing value handling, temporal encoding ranges, split size validation, sequence creation logic, holiday features, and model forward pass with gradient computation
+
+* API endpoints (test_api.py): 5 tests for the health check endpoint, valid/invalid prediction inputs, input shape validation, and response format verification
 
 ### Question 8
 
@@ -285,7 +321,7 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 10 fill here ---
+We did make use of DVC in the following way: instead of just letting our Google Cloud bucket be a "folder in the sky", we used it to track the exact version of the electricity data we pulled from the ENTSO-E API. Because that API data can change or get updated by utility companies, we needed a way to lock it down to ensure our experiments remained consistent. In the end, it helped us in three ways: 1. We used `dvc status` to spot API data updates, which told us if we were training on the same data or if the provider had sent us new information. 2. It helped us control the preprocessing part of our pipeline by ensuring that our raw files and processed split data always aligned with the specific version of the code we were running. 3. It allowed us to time-travel because if a new data update ever broke our model, we could simply jump back to an older Git commit where that `data.dvc` file pointed and run `dvc pull`to get the exact data that worked before.
 
 ### Question 11
 
@@ -321,7 +357,7 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
-We used Hydra to keep track of hyperparameter tuning. We stored the default settings in the 'config.yaml' file that ensured every experiment was reproducible. By integrating Hydra into 'train.py', we could train with the standard defaults or perform adjustments via the command for hyper-parameter tuning. To run with default settings: _python src/models/train.py_, and to launch a custom experiment using uv: _uv run train.py batch_size=256 early_stopping_patience=8_
+We used Hydra to keep track of hyperparameter tuning. We stored the default settings in the `config.yaml` file which ensured every experiment was reproducible. By integrating Hydra into `train.py`, we could train with the standard defaults or perform adjustments via the command for hyper-parameter tuning. To run with default settings via `python src/models/train.py`, and to launch a custom experiment using `uv run train.py batch_size=256 early_stopping_patience=8`.
 
 ### Question 13
 
@@ -368,7 +404,7 @@ We used Hydra to keep track of hyperparameter tuning. We stored the default sett
 >
 > Answer:
 
-In our project, we used Docker to create a consistent, isolated environment for model training, ensuring that all dependencies for our _'train.py'_ script were correctly configured regardless of the host system. We organized our project by storing our configuration in a _'dockerfiles/train.dockerfile'_. To run the experiment, we first built the image from the _'train.dockerfile'_ and then launched a container to execute the training logic. To build the image, we run: _docker build --platform linux/arm64 -f ./dockerfiles/train.dockerfile . -t train:latest_, and to build the container to execute 'train.py', we run: _docker run --platform linux/arm64 train:latest_. This approach allowed us to package the exact versions of libraries like PyTorch or TensorFlow, preventing version conflicts. Link to docker file: <https://github.com/yahei-DTU/mlops_loadconsumption/blob/main/dockerfiles/train.dockerfile>
+In our project, we used Docker to create a consistent and isolated environment for model training, ensuring that all dependencies for our `train.py` script were correctly configured regardless of the host system. We organized our project by storing our configuration in a `dockerfiles/train.dockerfile`. To run the experiment, we first built the image from the `train.dockerfile` and then launched a container to execute the training. To build the image, we run: `docker build --platform linux/arm64 -f ./dockerfiles/train.dockerfile . -t train:latest`. And then we start the image and run `train.py` via `docker run --platform linux/arm64 train:latest`. This approach allowed us to package the exact versions of libraries like PyTorch or TensorFlow, preventing version conflicts. Link to docker file: <https://github.com/yahei-DTU/mlops_loadconsumption/blob/main/dockerfiles/train.dockerfile>
 
 
 ### Question 16
@@ -401,7 +437,13 @@ In our project, we used Docker to create a consistent, isolated environment for 
 >
 > Answer:
 
---- question 17 fill here ---
+We used the following six services: Compute Engine, Cloud Storage, Artifact Registry, Cloud Build, Cloud Logging, and Identity and Access Management (IAM).
+Compute Engine is used to create and manage the Virtual Machines (VMs) that host the core application logic and processing power.
+Cloud Storage is used as our "digital warehouse" for storing and retrieving data objects, such as images, files, and large datasets.
+Artifact Registry is used as a secure, private location to store and manage our container images (Docker) and software packages.
+Cloud Build is used as our CI/CD engine that automatically builds, tests, and deploys our code whenever updates are made.
+Cloud logging is used to automatically collect and store system logs, enabling us to monitor the operational status of services and troubleshoot problems.
+Identity and Access Management (IAM) is used to manage permissions and security, ensuring only authorized users and services can access specific resources.
 
 ### Question 18
 
@@ -416,7 +458,7 @@ In our project, we used Docker to create a consistent, isolated environment for 
 >
 > Answer:
 
---- question 18 fill here ---
+We used the Compute Engine to run our machine learning model training and data processing tasks.  We used instances with the following hardware: primarily the n1-standard-1 machine type, which provided 1 vCPU and 3.75 GB of memory. This offered a balanced, cost-effective setup for our standard tasks. For specialized AI needs, we also utilized Deep Learning VMs like my-new-deeplearning-vm, which comes pre-configured with essential drivers and frameworks like TensorFlow. We also started the instances using a custom container by pulling our Docker images from the Artifact Registry. These were run on a stable Debian 12 operating system to ensure our environment stayed perfectly consistent across development and training stages.
 
 ### Question 19
 
@@ -458,7 +500,8 @@ In our project, we used Docker to create a consistent, isolated environment for 
 >
 > Answer:
 
---- question 22 fill here ---
+We managed to train our model in the cloud using Compute Engine. We chose the Engine over Vertex AI mainly because we wanted total control over the environment; it allowed us to pick our own operating system (Debian 12) and manually monitor the hardware as the model trained.
+To get it running, we first packaged all our code and libraries into a Docker container and pushed it to the Artifact Registry. Then, we launched an n1-standard-1 VM instance. We configured the VM to pull that specific container image and start running the training script immediately. This was the best approach for us because it kept our setup consistent—what worked on our local machines worked the same way in the cloud, making debugging a lot easier.
 
 ## Deployment
 
@@ -540,7 +583,9 @@ In our project, we used Docker to create a consistent, isolated environment for 
 >
 > Answer:
 
---- question 27 fill here ---
+Group member 1 used ..., Group member 2 used... In total, we spent about ... credits during the project. The most expensive part was Compute Engine. Since we had our n1-standard-1 instances and those specialized Deep Learning VMs running for long stretches to train our models, the uptime costs really added up. After that, networking and the VM manager were the next biggest expenses, while Cloud Storage was the cheapest since our datasets weren't huge.
+Overall, we really liked working in the cloud. The best part was the flexibility. It was great being able to launch a powerful machine in minutes rather than needing a high-end setup at home.
+However, there was definitely a learning curve when it came to managing the budget and figuring out all the different APIs. We also found IAM pretty frustrating to deal with—it felt like every time we tried to set something up, we ran into a permission error or a binding issue. But having everything in one place and getting access to professional AI tools really helped the whole project come together in the end.
 
 ### Question 28
 
@@ -606,5 +651,7 @@ In our project, we used Docker to create a consistent, isolated environment for 
 > Answer:
 
 --- question 31 fill here ---
+
+
 
 
