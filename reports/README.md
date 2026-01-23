@@ -58,19 +58,19 @@ will check the repositories and the code to verify your answers.
 * [x] Create the initial file structure using cookiecutter with an appropriate template (M6)
 * [x] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
 * [x] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
-* [ ] Remember to either fill out the `requirements.txt`/`requirements_dev.txt` files or keeping your
+* [x] Remember to either fill out the `requirements.txt`/`requirements_dev.txt` files or keeping your
     `pyproject.toml`/`uv.lock` up-to-date with whatever dependencies that you are using (M2+M6)
-* [ ] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
-* [ ] Do a bit of code typing and remember to document essential parts of your code (M7)
-* [ ] Setup version control for your data or part of your data (M8)
-* [ ] Add command line interfaces and project commands to your code where it makes sense (M9)
+* [x] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
+* [x] Do a bit of code typing and remember to document essential parts of your code (M7)
+* [x] Setup version control for your data or part of your data (M8)
+* [x] Add command line interfaces and project commands to your code where it makes sense (M9)
 * [x] Construct one or multiple docker files for your code (M10)
 * [x] Build the docker files locally and make sure they work as intended (M10)
 * [x] Write one or multiple configurations files for your experiments (M11)
 * [x] Used Hydra to load the configurations and manage your hyperparameters (M11)
 * [ ] Use profiling to optimize your code (M12)
 * [x] Use logging to log important events in your code (M14)
-* [ ] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
+* [x] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
 * [ ] Consider running a hyperparameter optimization sweep (M14)
 * [ ] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
 
@@ -81,23 +81,23 @@ will check the repositories and the code to verify your answers.
 * [x] Calculate the code coverage (M16)
 * [x] Get some continuous integration running on the GitHub repository (M17)
 * [x] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
-* [ ] Add a linting step to your continuous integration (M17)
-* [ ] Add pre-commit hooks to your version control setup (M18)
-* [ ] Add a continues workflow that triggers when data changes (M19)
-* [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
-* [ ] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
-* [ ] Create a trigger workflow for automatically building your docker images (M21)
-* [ ] Get your model training in GCP using either the Engine or Vertex AI (M21)
-* [ ] Create a FastAPI application that can do inference using your model (M22)
-* [ ] Deploy your model in GCP using either Functions or Run as the backend (M23)
-* [ ] Write API tests for your application and setup continues integration for these (M24)
-* [ ] Load test your application (M24)
+* [x] Add a linting step to your continuous integration (M17)
+* [x] Add pre-commit hooks to your version control setup (M18)
+* [x] Add a continues workflow that triggers when data changes (M19)
+* [x] Add a continues workflow that triggers when changes to the model registry is made (M19)
+* [x] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
+* [x] Create a trigger workflow for automatically building your docker images (M21)
+* [x] Get your model training in GCP using either the Engine or Vertex AI (M21)
+* [x] Create a FastAPI application that can do inference using your model (M22)
+* [x] Deploy your model in GCP using either Functions or Run as the backend (M23)
+* [x] Write API tests for your application and setup continues integration for these (M24)
+* [x] Load test your application (M24)
 * [ ] Create a more specialized ML-deployment API using either ONNX or BentoML, or both (M25)
 * [ ] Create a frontend for your API (M26)
 
 ### Week 3
 
-* [ ] Check how robust your model is towards data drifting (M27)
+* [x] Check how robust your model is towards data drifting (M27)
 * [ ] Setup collection of input-output data from your deployed application (M27)
 * [ ] Deploy to the cloud a drift detection API (M27)
 * [ ] Instrument your API with a couple of system metrics (M28)
@@ -134,7 +134,7 @@ Group 25
 >
 > Answer:
 
-s252605, s171204, s202390, 
+s252605, s171204, yahei, mcsr
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -153,6 +153,10 @@ Yes, we used a couple of open-source packages beyond the core course material:
 1. **entsoe-py**: A Python wrapper for the ENTSO-E API to automatically download hourly electricity load data for Denmark, which was critical for our data collection phase.
 
 2. **Plotly**: For interactive data visualization instead of just Matplotlib, helping us better present training results and model analysis.
+
+3. **holidays**: Library to specify if days in time series are part of holidays, which is an important parameter for our model.
+
+4. **tzdata**: For setting timezone correctly when running on windows.
 
 These packages complemented the course material by enabling efficient data collection and better visualization for stakeholder communication.
 
@@ -174,18 +178,22 @@ These packages complemented the course material by enabling efficient data colle
 >
 > Answer:
 
-We used `uv` for managing our dependencies and virtual environment. We manteined a `pyproject.toml` file that specifies all project dependencies with pinned versions. This approach ensures reproducibility across team members and environments.
+We used `uv` for managing our dependencies and virtual environment. We manteined a `pyproject.toml` file that specifies all project dependencies with version dependencies. This approach ensures reproducibility across team members and environments. The exact versions are also pinned in a `requirement.txt` and `requirement_dev.txt` and the uv.lock file, so there is different ways to install the environment, but the easiest is with uv as explained below.
+
 
 For a new team member to get an exact copy of our environment, they would:
 
 1. Clone the repository from GitHub
+
 2. Install `uv` (if not already installed): `curl -LsSf https://astral.sh/uv/install.sh | sh`
+
 3. Run `uv sync` in the project root directory, which creates a virtual environment and installs all dependencies specified in `pyproject.toml` and locked in `uv.lock`
+
 4. Activate the environment: `source .venv/bin/activate`
 
 The `uv.lock` file ensures that exact versions of all dependencies (including transitive dependencies) are installed. In case the command `uv sync` returns errors concerning the `uv.lock` file, please remove the `uv.lock` file via `rm uv.lock` and then run `uv sync`.
 
-We used Python 3.12+ as specified in `requires-python = ">=3.12"` in the `pyproject.toml`.
+We used Python 3.11 and 3.12 as specified in `requires-python = ">=3.11,<3.13"` in the `pyproject.toml`.
 
 ### Question 5
 
@@ -204,6 +212,10 @@ We used Python 3.12+ as specified in `requires-python = ">=3.12"` in the `pyproj
 From the cookiecutter template, we filled out the `src/mlops_loadconsumption/` folder with `data.py`, `model.py`, `train.py`, `visualize.py`, and `api.py` modules. The `data.py` module handles data fetching from the ENTSO-E API and preprocessing. The `model.py` contains our Conv1d neural network architecture, while `train.py` implements the training pipeline with validation and early stopping. We added a `visualize.py` module for interactive plotting using Plotly, and an `api.py` module that creates a FastAPI application for model inference.
 
 We also filled out the `configs/` directory with Hydra configuration files and the `dockerfiles/` folder with containerization files. Additionally, we set up GitHub Actions workflows in `.github/workflows/` for continuous integration, including unit tests, integration tests, data validation, and linting workflows.
+
+The data can be found in `Cloud Storage` through `.dvc`. The final model can be found in `model/`. The dockerfiles are in `dockerfiles/`. We use `cloudbuild.yaml` for `Cloud Build` and `.env` for `wandb`.
+
+
 
 
 ### Question 6
@@ -238,9 +250,9 @@ Typing and docs:
 * For documentation, we included docstrings for all classes and key methods.
 
   * The `MyDataset.__init__` has comprehensive docstrings explaining all parameters with their types and purposes.
-  
+
   * The `Model` class includes docstrings describing the architecture.
-  
+
   * The API endpoints in `api.py` have detailed docstrings explaining functionality, arguments, and return types.
 
 These concepts are crucial in larger projects because:
@@ -316,7 +328,7 @@ Even with close to **100%** coverage, the code would not be guaranteed to be err
 >
 > Answer:
 
---- question 9 fill here ---
+In our project, we followed a structured workflow using branches and pull requests (PRs) to manage development efficiently. Separate branches were created for individual tasks, features, or bug fixes, and in many cases, different developers worked on their own branches simultaneously. This approach helped isolate changes and avoid conflicts in the main codebase. Once a task was completed and tested, a pull request was opened to merge the branch into the main branch, allowing for review and discussion before integration. Additionally, we used Dependabot to automatically keep our dependencies up to date. Dependabot regularly (weekly) checked for outdated packages and generated its own branches and pull requests, making it easier to maintain security and stability without manual intervention.
 
 ### Question 10
 
@@ -444,7 +456,9 @@ We tracked several key metrics in Weights & Biases to monitor model performance 
 
 * Model Configuration: We logged model architecture details (parameter count, n_features, n_timesteps, n_outputs) and training hyperparameters (batch_size, initial learning_rate, epochs) to compare different experimental configurations.
 
-**######ADD SCREENSHOTS#########**
+* Train accuracy: We tracked the accuracy of the model in each training step. We can see that is increasing and converging as it is expected from model training.
+
+![W&B](image.png)
 
 
 ### Question 15
@@ -460,9 +474,9 @@ We tracked several key metrics in Weights & Biases to monitor model performance 
 >
 > Answer:
 
-In our project, we used Docker to create a consistent and isolated environment for model training, ensuring that all dependencies for our `train.py` script were correctly configured regardless of the host system. We organized our project by storing our configuration in a `dockerfiles/train.dockerfile`. 
+In our project, we used Docker to create a consistent and isolated environment for model training, ensuring that all dependencies for our `train.py` script were correctly configured regardless of the host system. We organized our project by storing our configuration in a `dockerfiles/train.dockerfile`.
 
-To run the experiment, we first built the image from the `train.dockerfile` and then launched a container to execute the training. 
+To run the experiment, we first built the image from the `train.dockerfile` and then launched a container to execute the training.
 
 To build the image, we run:
 ``` bash
@@ -476,6 +490,11 @@ docker run --platform linux/arm64 train:latest
 
 This approach allowed us to package the exact versions of libraries like PyTorch or TensorFlow, preventing version conflicts. Link to docker file: <https://github.com/yahei-DTU/mlops_loadconsumption/blob/main/dockerfiles/train.dockerfile>
 
+To run a docker process on the cloud, we use the `cloudbuild.yaml` file which specifies which dockerfile should be build on `Cloud Build`. It can be run by the following command:
+
+``` bash
+gcloud builds submit --config dockerfiles/cloudbuild.yaml
+```
 
 ### Question 16
 
@@ -532,9 +551,9 @@ Identity and Access Management (IAM) is used to manage permissions and security,
 >
 > Answer:
 
-We used the Compute Engine to run our machine learning model training and data processing tasks.  We used instances with the following hardware: primarily the n1-standard-1 machine type, which provided 1 vCPU and 3.75 GB of memory. 
+We used the Compute Engine to run our machine learning model training and data processing tasks.  We used instances with the following hardware: primarily the n1-standard-1 machine type, which provided 1 vCPU and 3.75 GB of memory.
 
-This offered a balanced, cost-effective setup for our standard tasks. For specialized AI needs, we also utilized Deep Learning VMs like my-new-deeplearning-vm, which comes pre-configured with essential drivers and frameworks like TensorFlow. 
+This offered a balanced, cost-effective setup for our standard tasks. For specialized AI needs, we also utilized Deep Learning VMs like my-new-deeplearning-vm, which comes pre-configured with essential drivers and frameworks like TensorFlow.
 
 We also started the instances using a custom container by pulling our Docker images from the Artifact Registry. These were run on a stable Debian 12 operating system to ensure our environment stayed perfectly consistent across development and training stages.
 
@@ -545,7 +564,7 @@ We also started the instances using a custom container by pulling our Docker ima
 >
 > Answer:
 
---- question 19 fill here ---
+![Storage bucket](image-1.png)
 
 ### Question 20
 
@@ -554,7 +573,7 @@ We also started the instances using a custom container by pulling our Docker ima
 >
 > Answer:
 
---- question 20 fill here ---
+![Docker images](image-2.png)
 
 ### Question 21
 
@@ -563,7 +582,8 @@ We also started the instances using a custom container by pulling our Docker ima
 >
 > Answer:
 
---- question 21 fill here ---
+![Build history](image-3.png)
+
 
 ### Question 22
 
@@ -595,8 +615,14 @@ To get it running, we first packaged all our code and libraries into a Docker co
 > *to the API to make it more ...*
 >
 > Answer:
+We wrote the API using FastAPI because it is lightweight, fast, and works very naturally with Python ML workflows. The API wraps the trained PyTorch model and exposes it through a `/predict` endpoint for inference and a `/health` endpoint for monitoring.
 
---- question 23 fill here ---
+One important design choice was loading the model once at startup using FastAPI’s `startup` event. This avoids reloading the model on every request, which would be slow and inefficient. I also kept the model in a global variable so it can be reused across requests. The model file is loaded from disk, set to evaluation mode, and mapped to CPU to keep deployment simple and portable.
+
+Another key aspect was input validation. I used Pydantic models to define clear request and response schemas and added explicit shape checks to ensure the input matches what the Conv1D model expects (96 timesteps × 12 features). I also handled tensor reshaping carefully for Conv1D compatibility.
+
+Overall, the API is simple but production-aware, with logging, error handling, health checks, and clean separation between model loading and inference.
+
 
 ### Question 24
 
@@ -611,8 +637,9 @@ To get it running, we first packaged all our code and libraries into a Docker co
 > *`curl -X POST -F "file=@file.json"<weburl>`*
 >
 > Answer:
+We could not deploy the model on cloud due to authentification errors and limited time at the end to fix these issues. However, we managed to deploy the api locally.
+##### Maria continues here
 
---- question 24 fill here ---
 
 ### Question 25
 
@@ -696,7 +723,16 @@ Due to time limitations, we limited this project to comply solely with the main 
 >
 > Answer:
 
---- question 29 fill here ---
+Instead of a figure, which we don't have time for anymore, we make a list of services that we used:
+ * git
+ * uv
+ * dvc
+ * docker
+ * GCP
+ * hydra
+ * wandb
+ * dependabot
+ * pre-commit
 
 ### Question 30
 
@@ -749,14 +785,16 @@ We found setting up Google Cloud to be one the most difficult parts. There are m
   * General code formatting adjustments
 
 * Student `yahei` contributed with:
+  * Setting the workflows
+  * Setting up hydra
   * Setting up Weights and Bias
-  * Setting up Google Cloud infrastructure
-  * Prepared the workflows
+  * Setting up Cloud Storage and dvc
+  * Setting up Cloud Artifact Registry for docker images
+  * Could Run of container processes
+
 
 * Mainly together we have:
   * Debugged code
   * Set up cookie cutter template
 
-
 While we have mostly debugged the code ourself, we have also done use of AI tools as ChatGPT and Claude for the more tedious debugging issues.
-
