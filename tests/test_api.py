@@ -24,6 +24,7 @@ def test_predict_with_valid_input(client):
     """Test prediction endpoint with valid input."""
     # Generate valid input: 96 timesteps, 12 features
     features = np.random.randn(96, 12).tolist()
+    print(features)
     
     response = client.post(
         "/predict",

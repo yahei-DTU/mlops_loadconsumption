@@ -1,20 +1,24 @@
 """FastAPI application for model inference."""
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime
 from pathlib import Path
 from typing import List
 
+import numpy as np
 import torch
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from mlops_loadconsumption.model import Model
+from src.mlops_loadconsumption.model import Model
+from src.mlops_loadconsumption.monitor import check_drift_from_logs
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Global model variable
 model = None
+predictions_log = []  # Store predictions for drift detection
 
 
 def load_model():
@@ -108,6 +112,15 @@ async def predict(request: PredictionRequest) -> PredictionResponse:
         with torch.no_grad():
             predictions = model(X).squeeze(0).tolist()
         
+        # Log the prediction
+        predictions_log.append({
+            "timestamp": datetime.now().isoformat(),
+            "input_mean": float(np.mean(request.features)),
+            "input_std": float(np.std(request.features)),
+            "output_mean": float(np.mean(predictions)),
+            "output_std": float(np.std(predictions))
+        })
+        
         logger.info("Prediction made successfully")
         
         return PredictionResponse(
@@ -118,6 +131,27 @@ async def predict(request: PredictionRequest) -> PredictionResponse:
     except Exception as e:
         logger.error(f"Prediction error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/logs")
+async def get_logs():
+    """Get prediction logs for monitoring."""
+    return {"predictions": predictions_log}
+
+
+@app.get("/check-drift")
+async def check_drift():
+    """Check for data drift in recent predictions."""
+    if len(predictions_log) < 10:
+        return {"message": "Not enough predictions to check drift (need at least 10)"}
+    
+    # Split logs: first half as reference, second half as current
+    mid = len(predictions_log) // 2
+    reference = predictions_log[:mid]
+    current = predictions_log[mid:]
+    
+    results = check_drift_from_logs(reference, current)
+    return results
 
 
 if __name__ == "__main__":
