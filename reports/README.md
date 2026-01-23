@@ -480,7 +480,7 @@ To run the experiment, we first built the image from the `train.dockerfile` and 
 
 To build the image, we run:
 ``` bash
-docker build --platform linux/arm64 -f ./dockerfiles/train.dockerfile . -t train:latest
+docker build --platform linux/arm64 -f ./dockerfiles/train_l.dockerfile . -t train:latest
 ```
 
 And then we start the image and run `train.py` via:
@@ -488,7 +488,7 @@ And then we start the image and run `train.py` via:
 docker run --platform linux/arm64 train:latest
 ```
 
-This approach allowed us to package the exact versions of libraries like PyTorch or TensorFlow, preventing version conflicts. Link to docker file: <https://github.com/yahei-DTU/mlops_loadconsumption/blob/main/dockerfiles/train.dockerfile>
+This approach allowed us to package the exact versions of libraries like PyTorch or TensorFlow, preventing version conflicts. Link to docker file: <https://github.com/yahei-DTU/mlops_loadconsumption/blob/main/dockerfiles/train_l.dockerfile>
 
 To run a docker process on the cloud, we use the `cloudbuild.yaml` file which specifies which dockerfile should be build on `Cloud Build`. It can be run by the following command:
 
@@ -784,7 +784,7 @@ We can identify some main challenges:
 * **ENTSOE-py API**: The api from entsoe-py had a bug that was discovered, ironically, on the submission day. The bug was related to a typo in the capitalization of the timezone for the retrieval of the electricity load data. We managed to find and correct that bug with a patch (in the first lines of data.py). After the course, we will open a PR to the entsoe-py library and make our own contribution there.
 
 (Dong: This is what I've thought of; perhaps we can add more content about deployment or API stuff.)
-We found setting up Google Cloud to be one the most difficult parts. There are many details to pay attention to, and getting the code running requires a lot of preparation beforehand. There are always various permission issues and configuration errors, which is very time-consuming and frustrating. We would check the error messages in the Cloud logs to find the cause of the errors, and then make the necessary corrections. Sometimes, if the modified files contained errors, we would need to use Git's version control to restore to the previous state before making changes again.
+We found setting up Google Cloud to be one of the most difficult parts. There are many details to pay attention to, and getting the code running requires a lot of setup beforehand. There are always various permission issues and configuration errors, which are very time-consuming and frustrating. We would check the error messages in the Cloud logs to find the cause of the errors, and then make the necessary corrections. Sometimes, if the modified files contained errors, we would need to use Git's version control to restore to the previous state before making changes again.
 
 ### Question 31
 
@@ -810,9 +810,9 @@ We found setting up Google Cloud to be one the most difficult parts. There are m
   * Deployed drift detection API endpoints to monitor model performance in production
 
 * Student `s171204` contributed with:
-  * Building and testing Dockerfiles locally to ensure consistent environments
-  * Implemented Hydra for configuration and hyper-parameters management
-  * Managed DVC setup by connecting it to Google Cloud Storage
+  * Building and testing Dockerfiles locally 
+  * Implemented Hydra for configuration and hyperparameter management
+  * DVC setup and connecting it to Google Cloud Storage
 
 * Student `mcsr` contributed with:
   * Data API to fetch electricity demand data
@@ -831,5 +831,7 @@ We found setting up Google Cloud to be one the most difficult parts. There are m
 * Mainly together we have:
   * Debugged code
   * Set up cookie cutter template
+  * Write the report
 
 While we have mostly debugged the code ourself, we have also done use of AI tools as ChatGPT and Claude for the more tedious debugging issues.
+
