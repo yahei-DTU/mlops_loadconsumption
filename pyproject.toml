@@ -22,7 +22,7 @@ dependencies = [
     "fastapi==0.115.6",
     "numpy>=2.3.0,<2.4.0",
     "ipykernel>=7.1.0",
-    "torch==2.6.0",
+    "torch==2.10.0",
     "typer==0.15.1",
     "uvicorn==0.34.0",
     "holidays>=0.88",
