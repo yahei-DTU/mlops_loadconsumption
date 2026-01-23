@@ -437,7 +437,13 @@ In our project, we used Docker to create a consistent and isolated environment f
 >
 > Answer:
 
---- question 17 fill here ---
+We used the following six services: Compute Engine, Cloud Storage, Artifact Registry, Cloud Build, Cloud Logging, and Identity and Access Management (IAM).
+Compute Engine is used to create and manage the Virtual Machines (VMs) that host the core application logic and processing power.
+Cloud Storage is used as our "digital warehouse" for storing and retrieving data objects, such as images, files, and large datasets.
+Artifact Registry is used as a secure, private location to store and manage our container images (Docker) and software packages.
+Cloud Build is used as our CI/CD engine that automatically builds, tests, and deploys our code whenever updates are made.
+Cloud logging is used to automatically collect and store system logs, enabling us to monitor the operational status of services and troubleshoot problems.
+Identity and Access Management (IAM) is used to manage permissions and security, ensuring only authorized users and services can access specific resources.
 
 ### Question 18
 
@@ -452,7 +458,7 @@ In our project, we used Docker to create a consistent and isolated environment f
 >
 > Answer:
 
---- question 18 fill here ---
+We used the Compute Engine to run our machine learning model training and data processing tasks.  We used instances with the following hardware: primarily the n1-standard-1 machine type, which provided 1 vCPU and 3.75 GB of memory. This offered a balanced, cost-effective setup for our standard tasks. For specialized AI needs, we also utilized Deep Learning VMs like my-new-deeplearning-vm, which comes pre-configured with essential drivers and frameworks like TensorFlow. We also started the instances using a custom container by pulling our Docker images from the Artifact Registry. These were run on a stable Debian 12 operating system to ensure our environment stayed perfectly consistent across development and training stages.
 
 ### Question 19
 
@@ -494,7 +500,8 @@ In our project, we used Docker to create a consistent and isolated environment f
 >
 > Answer:
 
---- question 22 fill here ---
+We managed to train our model in the cloud using Compute Engine. We chose the Engine over Vertex AI mainly because we wanted total control over the environment; it allowed us to pick our own operating system (Debian 12) and manually monitor the hardware as the model trained.
+To get it running, we first packaged all our code and libraries into a Docker container and pushed it to the Artifact Registry. Then, we launched an n1-standard-1 VM instance. We configured the VM to pull that specific container image and start running the training script immediately. This was the best approach for us because it kept our setup consistent—what worked on our local machines worked the same way in the cloud, making debugging a lot easier.
 
 ## Deployment
 
@@ -576,7 +583,9 @@ In our project, we used Docker to create a consistent and isolated environment f
 >
 > Answer:
 
---- question 27 fill here ---
+Group member 1 used ..., Group member 2 used... In total, we spent about ... credits during the project. The most expensive part was Compute Engine. Since we had our n1-standard-1 instances and those specialized Deep Learning VMs running for long stretches to train our models, the uptime costs really added up. After that, networking and the VM manager were the next biggest expenses, while Cloud Storage was the cheapest since our datasets weren't huge.
+Overall, we really liked working in the cloud. The best part was the flexibility. It was great being able to launch a powerful machine in minutes rather than needing a high-end setup at home.
+However, there was definitely a learning curve when it came to managing the budget and figuring out all the different APIs. We also found IAM pretty frustrating to deal with—it felt like every time we tried to set something up, we ran into a permission error or a binding issue. But having everything in one place and getting access to professional AI tools really helped the whole project come together in the end.
 
 ### Question 28
 
@@ -642,6 +651,7 @@ In our project, we used Docker to create a consistent and isolated environment f
 > Answer:
 
 --- question 31 fill here ---
+
 
 
 
