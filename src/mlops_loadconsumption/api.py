@@ -1,5 +1,6 @@
 """FastAPI application for model inference."""
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List
 
@@ -11,12 +12,6 @@ from mlops_loadconsumption.model import Model
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-app = FastAPI(
-    title="Load Consumption Prediction API",
-    description="API for electricity load forecasting",
-    version="1.0.0"
-)
 
 # Global model variable
 model = None
@@ -45,10 +40,19 @@ def load_model():
         raise
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Load model on startup."""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage app lifecycle."""
     load_model()
+    yield
+
+
+app = FastAPI(
+    title="Load Consumption Prediction API",
+    description="API for electricity load forecasting",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 
 class PredictionRequest(BaseModel):
