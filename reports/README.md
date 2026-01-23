@@ -739,7 +739,9 @@ We found setting up Google Cloud to be one the most difficult parts. There are m
   * TO BE FILLED
 
 * Student `s171204` contributed with:
-  * TO BE FILLED
+  * Building and testing Dockerfiles locally to ensure consistent environments
+  * Implemented Hydra for configuration and hyper-parameters management
+  * Managed DVC setup by connecting it to Google Cloud Storage
 
 * Student `mcsr` contributed with:
   * Data API to fetch electricity demand data
@@ -757,3 +759,4 @@ We found setting up Google Cloud to be one the most difficult parts. There are m
 
 
 While we have mostly debugged the code ourself, we have also done use of AI tools as ChatGPT and Claude for the more tedious debugging issues.
+
