@@ -134,7 +134,7 @@ Group 25
 >
 > Answer:
 
-s252605, s171204, 
+s252605, s171204, s202390, 
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -147,8 +147,6 @@ s252605, s171204,
 > *package to do ... and ... in our project*.
 >
 > Answer:
-
-### Question 3
 
 Yes, we used a couple of open-source packages beyond the core course material:
 
@@ -176,7 +174,7 @@ These packages complemented the course material by enabling efficient data colle
 >
 > Answer:
 
-We managed dependencies using `uv` and maintained a `pyproject.toml` file that specifies all project dependencies with pinned versions. This approach ensures reproducibility across team members and environments.
+We used `uv` for managing our dependencies and virtual environment. We manteined a `pyproject.toml` file that specifies all project dependencies with pinned versions. This approach ensures reproducibility across team members and environments.
 
 For a new team member to get an exact copy of our environment, they would:
 
@@ -185,9 +183,9 @@ For a new team member to get an exact copy of our environment, they would:
 3. Run `uv sync` in the project root directory, which creates a virtual environment and installs all dependencies specified in `pyproject.toml` and locked in `uv.lock`
 4. Activate the environment: `source .venv/bin/activate`
 
-The `uv.lock` file ensures that exact versions of all dependencies (including transitive dependencies) are installed, preventing version conflicts or "works on my machine" issues. We also used Python 3.12+ as specified in `requires-python = ">=3.12"` in the `pyproject.toml`.
+The `uv.lock` file ensures that exact versions of all dependencies (including transitive dependencies) are installed. In case the command `uv sync` returns errors concerning the `uv.lock` file, please remove the `uv.lock` file via `rm uv.lock` and then run `uv sync`.
 
-This approach is superior to `requirements.txt` because it provides better dependency resolution and handles both main and development dependencies through dependency groups in the same file.
+We used Python 3.12+ as specified in `requires-python = ">=3.12"` in the `pyproject.toml`.
 
 ### Question 5
 
@@ -205,7 +203,7 @@ This approach is superior to `requirements.txt` because it provides better depen
 
 From the cookiecutter template, we filled out the `src/mlops_loadconsumption/` folder with `data.py`, `model.py`, `train.py`, `visualize.py`, and `api.py` modules. The `data.py` module handles data fetching from the ENTSO-E API and preprocessing. The `model.py` contains our Conv1d neural network architecture, while `train.py` implements the training pipeline with validation and early stopping. We added a `visualize.py` module for interactive plotting using Plotly, and an `api.py` module that creates a FastAPI application for model inference.
 
-We also filled out the `configs/` directory with configuration constants and the `dockerfiles/` folder with containerization files. Additionally, we set up GitHub Actions workflows in `.github/workflows/` for continuous integration.
+We also filled out the `configs/` directory with Hydra configuration files and the `dockerfiles/` folder with containerization files. Additionally, we set up GitHub Actions workflows in `.github/workflows/` for continuous integration, including unit tests, integration tests, data validation, and linting workflows.
 
 
 ### Question 6
@@ -221,7 +219,37 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 6 fill here ---
+Linting, formatting and pre-commit:
+
+* We used Ruff (version 0.1.3) for both linting and formatting, configured with a 120-character line length in `pyproject.toml`.
+
+* We set up pre-commit hooks that automatically check for trailing whitespace, YAML validation, and large files before each commit.
+
+Typing and docs:
+
+* We implemented type hints for function parameters and return types throughout the codebase.
+
+  * In `data.py`, methods include type annotations like def `__init__(self, n_input_timesteps: int, ...) -> None:`.
+
+  * In `model.py`, the forward method is annotated as `def forward(self, x: torch.Tensor) -> torch.Tensor:`.
+
+  * In `api.py`, we used Pydantic models `(PredictionRequest, PredictionResponse)` for API schema validation with type safety.
+
+* For documentation, we included docstrings for all classes and key methods.
+
+  * The `MyDataset.__init__` has comprehensive docstrings explaining all parameters with their types and purposes.
+  
+  * The `Model` class includes docstrings describing the architecture.
+  
+  * The API endpoints in `api.py` have detailed docstrings explaining functionality, arguments, and return types.
+
+These concepts are crucial in larger projects because:
+
+1. Type hints catch errors early during development and provide better IDE autocomplete support
+
+2. Ruff formatting reduces merge conflicts, making code reviews focused on logic rather than style
+
+3. Pre-commit hooks enforce quality standards automatically
 
 ## Version control
 
@@ -240,7 +268,15 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 7 fill here ---
+We implemented approximately 39 tests across multiple test files. We primarily tested:
+
+* Data processing (test_data.py): 22 tests covering data directory existence, raw data validation, processed data quality, and train/val/test splits integrity
+
+* Model architecture and training (test_model.py): 3 integration tests verifying that training reduces loss, and gradients flow correctly through all parameters
+
+* Unit tests: 9 tests covering dataset imports, resampling logic, missing value handling, temporal encoding ranges, split size validation and model forward pass with gradient computation
+
+* API endpoints (test_api.py): 5 tests for the health check endpoint, valid/invalid prediction inputs, input shape validation, and response format verification
 
 ### Question 8
 
@@ -255,7 +291,17 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 8 fill here ---
+The total code coverage of our project is **42%**, based on the coverage report shown below. Coverage differs substantially across modules. The `api.py` and `model.py` files achieve relatively high coverage (**84%** and **81%**), as these components are critical for inference and were straightforward to test using unit and integration tests. In contrast, `data.py` has very low coverage (**20%**) because it contains extensive logic for external API calls, file system operations, and preprocessing steps that are difficult to test without heavy mocking.
+
+Even with close to **100%** coverage, the code would not be guaranteed to be error-free. Coverage only measures whether lines were executed, not whether edge cases, incorrect assumptions, or failure scenarios were handled correctly. Therefore, code coverage should be interpreted as a supporting metric rather than proof of correctness.
+
+| Module | Statements | Missed | Coverage |
+|--------|------------|--------|----------|
+| api.py | 58 | 9 | 84% |
+| data.py | 174 | 139 | 20% |
+| model.py | 37 | 7 | 81% |
+| **Total** | 269 | 155 | **42%** |
+
 
 ### Question 9
 
@@ -285,7 +331,15 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 10 fill here ---
+Yes, we used DVC to track exact versions of ENTSO-E API data since it can change when utility companies update it. Because that API data can change or get updated by utility companies, we needed a way to lock it down to ensure our experiments remained consistent.
+In the end, it helped us in three ways:
+
+1. We used dvc status to spot API data updates, which told us if we were training on the same data or if the provider had sent us new information
+
+2. It helped us control the preprocessing part of our pipeline by ensuring that our raw files and processed split data always aligned with the specific version of the code we were running
+
+3. It allowed us to time-travel because if a new data update ever broke our model, we could simply jump back to an older Git commit where that data.dvc file pointed and run dvc pull to get the exact data that worked before
+
 
 ### Question 11
 
@@ -302,7 +356,21 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 11 fill here ---
+We organized our continuous integration into 5 separate workflows:
+
+1. Unit Tests (`unit-tests.yaml`): Runs on all pull requests, testing across multiple OS (Ubuntu, Windows, macOS), Python versions (3.11, 3.12), and PyTorch versions (2.2.0, 2.3.0). This creates a test matrix with 3 operating systems × 2 Python versions × 2 PyTorch versions = 12 test combinations, ensuring our code works across different environments. It includes coverage reporting using the `coverage` package.
+
+2. Integration Tests (`integration-test.yaml`): Triggered on pushes/PRs to main that affect the models/ directory. Tests the complete model training workflow on Ubuntu with Python 3.12 and PyTorch 2.3.0.
+
+3. Data Validation (`data-test.yaml`): Runs when data/** or tests/test_data.py changes, validating data quality, format, hourly resolution, and integrity. Ensures that data changes don't break expectations.
+
+4. Code Linting (`linting.yaml`): Runs Ruff linting on pushes/PRs to main, enforcing code style and catching potential bugs before they're merged.
+
+5. Pre-commit Auto-update (`pre-commit-update.yaml`): Scheduled to run daily, automatically updating pre-commit hooks and creating PRs for version updates.
+
+We also configured Dependabot (`dependabot.yaml`) for weekly automated dependency updates across pip, uv, and GitHub Actions.
+
+Caching: We use `cache: 'pip'` in the `actions/setup-python@v6` step across all workflows to speed up dependency installation by caching pip packages between runs.
 
 ## Running code and tracking experiments
 
@@ -321,7 +389,9 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 12 fill here ---
+We used Hydra to keep track of hyperparameter tuning. We stored the default settings in the `config.yaml` file which ensured every experiment was reproducible. By integrating Hydra into `train.py`, we could train with the standard defaults or perform adjustments via the command for hyper-parameter tuning.
+
+To run with default settings via `python src/models/train.py`, and to launch a custom experiment using `uv run train.py batch_size=256 early_stopping_patience=8`.
 
 ### Question 13
 
@@ -336,7 +406,17 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 13 fill here ---
+We ensured reproducibility through:
+
+* Hydra configuration files: All hyperparameters are stored in `configs/config.yaml`, and Hydra automatically creates timestamped output directories for each run (e.g., `outputs/2025-01-23/14-30-00/`), preserving the exact configuration used for that experiment.
+
+* Logging: We used Python's logging module throughout `data.py` and `train.py` to track data preprocessing steps, training progress, validation metrics, and any errors encountered.
+
+* W&B integration: We logged training/validation loss per epoch and per step, learning rate, model parameter counts, and key hyperparameters to Weights & Biases for long-term experiment tracking and comparison.
+
+* DVC for data versioning: Ensures the exact version of raw and processed data is tracked and can be retrieved.
+
+* Model checkpoints: We save the best model based on validation loss with early stopping, allowing us to recover the exact model state.
 
 ### Question 14
 
@@ -353,7 +433,19 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 14 fill here ---
+
+We tracked several key metrics in Weights & Biases to monitor model performance and training dynamics:
+
+* Training and Validation Loss: We logged MSE loss for both training and validation sets at each epoch. The training loss shows how well the model fits the training data, while validation loss indicates generalization performance. Monitoring both helps detect overfitting - if validation loss increases while training loss decreases, the model is memorizing rather than learning patterns.
+
+* Per-step Training Metrics: We logged loss and accuracy at every batch step during training (not just per epoch), giving us fine-grained insight into training stability. Sudden spikes in loss can indicate learning rate issues or problematic batches.
+
+* Learning Rate: We tracked the learning rate over time, especially important because we used ReduceLROnPlateau scheduler that automatically reduces learning rate when validation loss plateaus. This helped us understand when the model stopped improving and needed a smaller learning rate to fine-tune.
+
+* Model Configuration: We logged model architecture details (parameter count, n_features, n_timesteps, n_outputs) and training hyperparameters (batch_size, initial learning_rate, epochs) to compare different experimental configurations.
+
+**######ADD SCREENSHOTS#########**
+
 
 ### Question 15
 
@@ -368,7 +460,22 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 15 fill here ---
+In our project, we used Docker to create a consistent and isolated environment for model training, ensuring that all dependencies for our `train.py` script were correctly configured regardless of the host system. We organized our project by storing our configuration in a `dockerfiles/train.dockerfile`. 
+
+To run the experiment, we first built the image from the `train.dockerfile` and then launched a container to execute the training. 
+
+To build the image, we run:
+``` bash
+docker build --platform linux/arm64 -f ./dockerfiles/train.dockerfile . -t train:latest
+```
+
+And then we start the image and run `train.py` via:
+``` bash
+docker run --platform linux/arm64 train:latest
+```
+
+This approach allowed us to package the exact versions of libraries like PyTorch or TensorFlow, preventing version conflicts. Link to docker file: <https://github.com/yahei-DTU/mlops_loadconsumption/blob/main/dockerfiles/train.dockerfile>
+
 
 ### Question 16
 
@@ -383,7 +490,11 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 16 fill here ---
+Within the group we generally use two different methods for debigging:
+
+* **Jupyter interactive window**: To access this debugging method, one would simply run the filw with the option "Run in interactive window". The advantages are that the code would be ran as a jupyter notebook, making available all the variables used in the workspace. The cons is that this approach is slow in execution since one would have to wait to initialize first the jupyter kernel.
+
+* **Built-in VS Code debugger**: The main tool in VS Code. A steep learning curve at the beginning, but once some confidence has been established with this tool, it was the go-to for all group members.
 
 ## Working in the cloud
 
@@ -400,7 +511,13 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 17 fill here ---
+We used the following six services: Compute Engine, Cloud Storage, Artifact Registry, Cloud Build, Cloud Logging, and Identity and Access Management (IAM).
+Compute Engine is used to create and manage the Virtual Machines (VMs) that host the core application logic and processing power.
+Cloud Storage is used as our "digital warehouse" for storing and retrieving data objects, such as images, files, and large datasets.
+Artifact Registry is used as a secure, private location to store and manage our container images (Docker) and software packages.
+Cloud Build is used as our CI/CD engine that automatically builds, tests, and deploys our code whenever updates are made.
+Cloud logging is used to automatically collect and store system logs, enabling us to monitor the operational status of services and troubleshoot problems.
+Identity and Access Management (IAM) is used to manage permissions and security, ensuring only authorized users and services can access specific resources.
 
 ### Question 18
 
@@ -415,7 +532,11 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 18 fill here ---
+We used the Compute Engine to run our machine learning model training and data processing tasks.  We used instances with the following hardware: primarily the n1-standard-1 machine type, which provided 1 vCPU and 3.75 GB of memory. 
+
+This offered a balanced, cost-effective setup for our standard tasks. For specialized AI needs, we also utilized Deep Learning VMs like my-new-deeplearning-vm, which comes pre-configured with essential drivers and frameworks like TensorFlow. 
+
+We also started the instances using a custom container by pulling our Docker images from the Artifact Registry. These were run on a stable Debian 12 operating system to ensure our environment stayed perfectly consistent across development and training stages.
 
 ### Question 19
 
@@ -457,7 +578,8 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 22 fill here ---
+We managed to train our model in the cloud using Compute Engine. We chose the Engine over Vertex AI mainly because we wanted total control over the environment; it allowed us to pick our own operating system (Debian 12) and manually monitor the hardware as the model trained.
+To get it running, we first packaged all our code and libraries into a Docker container and pushed it to the Artifact Registry. Then, we launched an n1-standard-1 VM instance. We configured the VM to pull that specific container image and start running the training script immediately. This was the best approach for us because it kept our setup consistent—what worked on our local machines worked the same way in the cloud, making debugging a lot easier.
 
 ## Deployment
 
@@ -539,7 +661,9 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 27 fill here ---
+Group member 1 used 5 dollars, and Group member 2 used 3 dollars. In total, we spent about 8 credits during the project. The most expensive part was Compute Engine. Since we had our n1-standard-1 instances and those specialized Deep Learning VMs running for long stretches to train our models, the uptime costs really added up. After that, Artifact registry was the next biggest expenses, and then networking and the VM manager, while Cloud Storage was the cheapest since our datasets weren't huge.
+Overall, we liked working in the cloud. The best part was the flexibility. It was great being able to launch a powerful machine in minutes rather than needing a high-end setup at home.
+However, there was challenging when it came to managing the budget and figuring out all the different APIs. We also found IAM pretty frustrating to deal with. It felt like every time we tried to set something up, we ran into a permission error or a binding issue. But having everything in one place and getting access to professional AI tools really helped the whole project come together in the end.
 
 ### Question 28
 
@@ -555,7 +679,7 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 28 fill here ---
+Due to time limitations, we limited this project to comply solely with the main TODOs, prioritizing the core modules and negleting the extra features.
 
 ### Question 29
 
@@ -586,7 +710,14 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 30 fill here ---
+We can identify some main challenges:
+
+* **Google Cloud Platform**: its usage  was not successful on ouy end, leading to many failures in our attempts to train the model.
+
+* **ENTSOE-py API**: The api from entsoe-py had a bug that was discovered, ironically, on the submission day. The bug was related to a typo in the capitalization of the timezone for the retrieval of the electricity load data. We managed to find and correct that bug with a patch (in the first lines of data.py). After the course, we will open a PR to the entsoe-py library and make our own contribution there.
+
+(Dong: This is what I've thought of; perhaps we can add more content about deployment or API stuff.)
+We found setting up Google Cloud to be one the most difficult parts. There are many details to pay attention to, and getting the code running requires a lot of preparation beforehand. There are always various permission issues and configuration errors, which is very time-consuming and frustrating. We would check the error messages in the Cloud logs to find the cause of the errors, and then make the necessary corrections. Sometimes, if the modified files contained errors, we would need to use Git's version control to restore to the previous state before making changes again.
 
 ### Question 31
 
@@ -604,4 +735,25 @@ We also filled out the `configs/` directory with configuration constants and the
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- question 31 fill here ---
+* Student `s252605` contributed with:
+  * TO BE FILLED
+
+* Student `s171204` contributed with:
+  * TO BE FILLED
+
+* Student `mcsr` contributed with:
+  * Data API to fetch electricity demand data
+  * Curated the tests for the data.py script together with unit_tests
+  * General code formatting adjustments
+
+* Student `yahei` contributed with:
+  * Setting up Weights and Bias
+  * Setting up Google Cloud infrastructure
+  * Prepared the workflows
+
+* Mainly together we have:
+  * Debugged code
+  * Set up cookie cutter template
+
+
+While we have mostly debugged the code ourself, we have also done use of AI tools as ChatGPT and Claude for the more tedious debugging issues.
