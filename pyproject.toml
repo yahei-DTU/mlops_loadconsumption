@@ -32,6 +32,8 @@ dependencies = [
     "google-api-python-client>=2.188.0",
     "dvc-gs>=3.0.2",
     "wandb>=0.24.0",
+    "dvc>=3.65.0",
+    "tzdata==2025.1",
 ]
 
 [dependency-groups]
