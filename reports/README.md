@@ -98,7 +98,7 @@ will check the repositories and the code to verify your answers.
 ### Week 3
 
 * [x] Check how robust your model is towards data drifting (M27)
-* [ ] Setup collection of input-output data from your deployed application (M27)
+* [x] Setup collection of input-output data from your deployed application (M27)
 * [ ] Deploy to the cloud a drift detection API (M27)
 * [ ] Instrument your API with a couple of system metrics (M28)
 * [ ] Setup cloud monitoring of your instrumented application (M28)
@@ -637,8 +637,12 @@ Overall, the API is simple but production-aware, with logging, error handling, h
 > *`curl -X POST -F "file=@file.json"<weburl>`*
 >
 > Answer:
-We could not deploy the model on cloud due to authentification errors and limited time at the end to fix these issues. However, we managed to deploy the api locally.
-##### Maria continues here
+We could not deploy the model on cloud due to authentification errors and limited time at the end to fix these issues. However, we managed to deploy the api locally for our model using FastAPI. We created a /predict endpoint that accepts input features with shape (96, 12) representing 96 timesteps and 12 features. The endpoint returns 24 predictions for future load consumption along with the model version. Some special features were also implemented:
+- Used FastAPI's lifespan context manager to load the model once when the application starts, improving performance.
+- Added Pydantic models (PredictionRequest and PredictionResponse) to validate and document the API contract.
+- Each prediction logs input statistics (mean, std) and output statistics with timestamps to /logs endpoint, enabling drift detection following MLOps best practices.
+- Added a /check-drift endpoint that uses the Evidently library to detect data drift by comparing reference and current prediction logs.
+- Implemented /health for monitoring application status and model availability.
 
 
 ### Question 25
@@ -654,7 +658,22 @@ We could not deploy the model on cloud due to authentification errors and limite
 >
 > Answer:
 
---- question 25 fill here ---
+For unit testing we used pytest with FastAPI.TestClient to validate our API endpoints. We created 5 unit tests in test_api.py covering:
+
+- Health check endpoint functionality
+- Prediction endpoint with valid input (96×12 shape)
+- Input validation for invalid shapes and wrong feature counts
+- Response format validation (predictions list and model_version fields)
+
+For load testing, we would use locust, a Python-based load testing framework. To implement it, we would create a locustfile.py that simulates multiple concurrent users making prediction requests to the /predict endpoint. The test would gradually increase the number of users and measure response times, throughput, and identify at what point the API starts failing.
+
+We did not complete the load testing due to time constraints, but the implementation would involve:
+
+- Installing locust: uv add locust
+- Creating scenarios with different request patterns
+- Running: locust -f locustfile.py --host=http://localhost:8000
+- Monitoring metrics like requests/second, response times, and failure rates
+This would help us understand the API's capacity limits and ensure it can handle production traffic.
 
 ### Question 26
 
@@ -669,7 +688,19 @@ We could not deploy the model on cloud due to authentification errors and limite
 >
 > Answer:
 
---- question 26 fill here ---
+We implemented monitoring of our deployed model by collecting prediction logs and detecting data drift. Our monitoring system works as follows:
+
+Each time the API makes a prediction via the /predict endpoint, it logs input statistics (mean, std) and output statistics with timestamps to predictions_log. This continuous data collection from production allows us to track how the model behaves over time.
+
+We implemented a /check-drift endpoint that uses the Evidently library to compare reference vs. current prediction logs, detecting if the input data distribution has shifted significantly - indicating potential data drift.
+
+This monitoring infrastructure helps the longevity of our application by:
+
+- Early drift detection: Alerts us when input data distribution changes, before model performance degrades
+- Performance tracking: Observes prediction patterns over time to spot anomalies
+- Informed retraining: When drift is detected in production, we know when to retrain on new data
+
+By continuously monitoring these metrics in production rather than just testing once before deployment, we can maintain model reliability and catch issues before they impact users.
 
 ## Overall discussion of project
 
@@ -772,7 +803,11 @@ We found setting up Google Cloud to be one the most difficult parts. There are m
 > Answer:
 
 * Student `s252605` contributed with:
-  * TO BE FILLED
+  * Developed model architecture and training
+  * Implemented the FastAPI
+  * Created unit tests for the API
+  * Implemented drift detection
+  * Deployed drift detection API endpoints to monitor model performance in production
 
 * Student `s171204` contributed with:
   * Building and testing Dockerfiles locally to ensure consistent environments
