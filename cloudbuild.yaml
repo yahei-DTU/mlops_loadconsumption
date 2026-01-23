@@ -5,15 +5,15 @@ steps:
     'build',
     '.',
     '-t',
-    'europe-west1-docker.pkg.dev/$PROJECT_ID/mlops-loadconsumption/train:latest',
+    'europe-west1-docker.pkg.dev/$PROJECT_ID/mlops-loadconsumption/api:latest',
     '-f',
-    'dockerfiles/train.dockerfile'
+    'dockerfiles/api.dockerfile'
   ]
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Push container image'
   args: [
     'push',
-    'europe-west1-docker.pkg.dev/$PROJECT_ID/mlops-loadconsumption/train:latest'
+    'europe-west1-docker.pkg.dev/$PROJECT_ID/mlops-loadconsumption/api:latest'
   ]
 options:
   logging: CLOUD_LOGGING_ONLY
