@@ -152,7 +152,7 @@ Yes, we used a couple of open-source packages beyond the core course material:
 
 1. **entsoe-py**: A Python wrapper for the ENTSO-E API to automatically download hourly electricity load data for Denmark, which was critical for our data collection phase.
 
-2. **Plotly (###############NOT SURE TO ADD THIS################### )**: For interactive data visualization instead of just Matplotlib, helping us better present training results and model analysis.
+2. **Plotly**: For interactive data visualization instead of just Matplotlib, helping us better present training results and model analysis.
 
 These packages complemented the course material by enabling efficient data collection and better visualization for stakeholder communication.
 
@@ -268,13 +268,13 @@ These concepts are crucial in larger projects because:
 >
 > Answer:
 
-In total, we implemented approximately 39 tests across multiple test files. We primarily tested:
+We implemented approximately 39 tests across multiple test files. We primarily tested:
 
 * Data processing (test_data.py): 22 tests covering data directory existence, raw data validation, processed data quality, and train/val/test splits integrity
 
-* Model architecture and training (test_model.py): 3 integration tests verifying that training reduces loss, the model can overfit small batches (sanity check), and gradients flow correctly through all parameters
+* Model architecture and training (test_model.py): 3 integration tests verifying that training reduces loss, and gradients flow correctly through all parameters
 
-* Unit tests: 9 tests covering dataset imports, resampling logic, missing value handling, temporal encoding ranges, split size validation, sequence creation logic, holiday features, and model forward pass with gradient computation
+* Unit tests: 9 tests covering dataset imports, resampling logic, missing value handling, temporal encoding ranges, split size validation and model forward pass with gradient computation
 
 * API endpoints (test_api.py): 5 tests for the health check endpoint, valid/invalid prediction inputs, input shape validation, and response format verification
 
@@ -291,7 +291,17 @@ In total, we implemented approximately 39 tests across multiple test files. We p
 >
 > Answer:
 
---- question 8 fill here ---
+The total code coverage of our project is **42%**, based on the coverage report shown below. Coverage differs substantially across modules. The `api.py` and `model.py` files achieve relatively high coverage (**84%** and **81%**), as these components are critical for inference and were straightforward to test using unit and integration tests. In contrast, `data.py` has very low coverage (**20%**) because it contains extensive logic for external API calls, file system operations, and preprocessing steps that are difficult to test without heavy mocking.
+
+Even with close to **100%** coverage, the code would not be guaranteed to be error-free. Coverage only measures whether lines were executed, not whether edge cases, incorrect assumptions, or failure scenarios were handled correctly. Therefore, code coverage should be interpreted as a supporting metric rather than proof of correctness.
+
+| Module | Statements | Missed | Coverage |
+|--------|------------|--------|----------|
+| api.py | 58 | 9 | 84% |
+| data.py | 174 | 139 | 20% |
+| model.py | 37 | 7 | 81% |
+| **Total** | 269 | 155 | **42%** |
+
 
 ### Question 9
 
@@ -321,7 +331,15 @@ In total, we implemented approximately 39 tests across multiple test files. We p
 >
 > Answer:
 
-We did make use of DVC in the following way: instead of just letting our Google Cloud bucket be a "folder in the sky", we used it to track the exact version of the electricity data we pulled from the ENTSO-E API. Because that API data can change or get updated by utility companies, we needed a way to lock it down to ensure our experiments remained consistent. In the end, it helped us in three ways: 1. We used `dvc status` to spot API data updates, which told us if we were training on the same data or if the provider had sent us new information. 2. It helped us control the preprocessing part of our pipeline by ensuring that our raw files and processed split data always aligned with the specific version of the code we were running. 3. It allowed us to time-travel because if a new data update ever broke our model, we could simply jump back to an older Git commit where that `data.dvc` file pointed and run `dvc pull`to get the exact data that worked before.
+Yes, we used DVC to track exact versions of ENTSO-E API data since it can change when utility companies update it. Because that API data can change or get updated by utility companies, we needed a way to lock it down to ensure our experiments remained consistent.
+In the end, it helped us in three ways:
+
+1. We used dvc status to spot API data updates, which told us if we were training on the same data or if the provider had sent us new information
+
+2. It helped us control the preprocessing part of our pipeline by ensuring that our raw files and processed split data always aligned with the specific version of the code we were running
+
+3. It allowed us to time-travel because if a new data update ever broke our model, we could simply jump back to an older Git commit where that data.dvc file pointed and run dvc pull to get the exact data that worked before
+
 
 ### Question 11
 
@@ -338,7 +356,21 @@ We did make use of DVC in the following way: instead of just letting our Google 
 >
 > Answer:
 
---- question 11 fill here ---
+We organized our continuous integration into 5 separate workflows:
+
+1. Unit Tests (`unit-tests.yaml`): Runs on all pull requests, testing across multiple OS (Ubuntu, Windows, macOS), Python versions (3.11, 3.12), and PyTorch versions (2.2.0, 2.3.0). This creates a test matrix with 3 operating systems × 2 Python versions × 2 PyTorch versions = 12 test combinations, ensuring our code works across different environments. It includes coverage reporting using the `coverage` package.
+
+2. Integration Tests (`integration-test.yaml`): Triggered on pushes/PRs to main that affect the models/ directory. Tests the complete model training workflow on Ubuntu with Python 3.12 and PyTorch 2.3.0.
+
+3. Data Validation (`data-test.yaml`): Runs when data/** or tests/test_data.py changes, validating data quality, format, hourly resolution, and integrity. Ensures that data changes don't break expectations.
+
+4. Code Linting (`linting.yaml`): Runs Ruff linting on pushes/PRs to main, enforcing code style and catching potential bugs before they're merged.
+
+5. Pre-commit Auto-update (`pre-commit-update.yaml`): Scheduled to run daily, automatically updating pre-commit hooks and creating PRs for version updates.
+
+We also configured Dependabot (`dependabot.yaml`) for weekly automated dependency updates across pip, uv, and GitHub Actions.
+
+Caching: We use `cache: 'pip'` in the `actions/setup-python@v6` step across all workflows to speed up dependency installation by caching pip packages between runs.
 
 ## Running code and tracking experiments
 
@@ -357,7 +389,9 @@ We did make use of DVC in the following way: instead of just letting our Google 
 >
 > Answer:
 
-We used Hydra to keep track of hyperparameter tuning. We stored the default settings in the `config.yaml` file which ensured every experiment was reproducible. By integrating Hydra into `train.py`, we could train with the standard defaults or perform adjustments via the command for hyper-parameter tuning. To run with default settings via `python src/models/train.py`, and to launch a custom experiment using `uv run train.py batch_size=256 early_stopping_patience=8`.
+We used Hydra to keep track of hyperparameter tuning. We stored the default settings in the `config.yaml` file which ensured every experiment was reproducible. By integrating Hydra into `train.py`, we could train with the standard defaults or perform adjustments via the command for hyper-parameter tuning.
+
+To run with default settings via `python src/models/train.py`, and to launch a custom experiment using `uv run train.py batch_size=256 early_stopping_patience=8`.
 
 ### Question 13
 
@@ -372,7 +406,17 @@ We used Hydra to keep track of hyperparameter tuning. We stored the default sett
 >
 > Answer:
 
---- question 13 fill here ---
+We ensured reproducibility through:
+
+* Hydra configuration files: All hyperparameters are stored in `configs/config.yaml`, and Hydra automatically creates timestamped output directories for each run (e.g., `outputs/2025-01-23/14-30-00/`), preserving the exact configuration used for that experiment.
+
+* Logging: We used Python's logging module throughout `data.py` and `train.py` to track data preprocessing steps, training progress, validation metrics, and any errors encountered.
+
+* W&B integration: We logged training/validation loss per epoch and per step, learning rate, model parameter counts, and key hyperparameters to Weights & Biases for long-term experiment tracking and comparison.
+
+* DVC for data versioning: Ensures the exact version of raw and processed data is tracked and can be retrieved.
+
+* Model checkpoints: We save the best model based on validation loss with early stopping, allowing us to recover the exact model state.
 
 ### Question 14
 
@@ -389,7 +433,19 @@ We used Hydra to keep track of hyperparameter tuning. We stored the default sett
 >
 > Answer:
 
---- question 14 fill here ---
+
+We tracked several key metrics in Weights & Biases to monitor model performance and training dynamics:
+
+* Training and Validation Loss: We logged MSE loss for both training and validation sets at each epoch. The training loss shows how well the model fits the training data, while validation loss indicates generalization performance. Monitoring both helps detect overfitting - if validation loss increases while training loss decreases, the model is memorizing rather than learning patterns.
+
+* Per-step Training Metrics: We logged loss and accuracy at every batch step during training (not just per epoch), giving us fine-grained insight into training stability. Sudden spikes in loss can indicate learning rate issues or problematic batches.
+
+* Learning Rate: We tracked the learning rate over time, especially important because we used ReduceLROnPlateau scheduler that automatically reduces learning rate when validation loss plateaus. This helped us understand when the model stopped improving and needed a smaller learning rate to fine-tune.
+
+* Model Configuration: We logged model architecture details (parameter count, n_features, n_timesteps, n_outputs) and training hyperparameters (batch_size, initial learning_rate, epochs) to compare different experimental configurations.
+
+**######ADD SCREENSHOTS#########**
+
 
 ### Question 15
 
@@ -404,7 +460,21 @@ We used Hydra to keep track of hyperparameter tuning. We stored the default sett
 >
 > Answer:
 
-In our project, we used Docker to create a consistent and isolated environment for model training, ensuring that all dependencies for our `train.py` script were correctly configured regardless of the host system. We organized our project by storing our configuration in a `dockerfiles/train.dockerfile`. To run the experiment, we first built the image from the `train.dockerfile` and then launched a container to execute the training. To build the image, we run: `docker build --platform linux/arm64 -f ./dockerfiles/train.dockerfile . -t train:latest`. And then we start the image and run `train.py` via `docker run --platform linux/arm64 train:latest`. This approach allowed us to package the exact versions of libraries like PyTorch or TensorFlow, preventing version conflicts. Link to docker file: <https://github.com/yahei-DTU/mlops_loadconsumption/blob/main/dockerfiles/train.dockerfile>
+In our project, we used Docker to create a consistent and isolated environment for model training, ensuring that all dependencies for our `train.py` script were correctly configured regardless of the host system. We organized our project by storing our configuration in a `dockerfiles/train.dockerfile`. 
+
+To run the experiment, we first built the image from the `train.dockerfile` and then launched a container to execute the training. 
+
+To build the image, we run:
+``` bash
+docker build --platform linux/arm64 -f ./dockerfiles/train.dockerfile . -t train:latest
+```
+
+And then we start the image and run `train.py` via:
+``` bash
+docker run --platform linux/arm64 train:latest
+```
+
+This approach allowed us to package the exact versions of libraries like PyTorch or TensorFlow, preventing version conflicts. Link to docker file: <https://github.com/yahei-DTU/mlops_loadconsumption/blob/main/dockerfiles/train.dockerfile>
 
 
 ### Question 16
