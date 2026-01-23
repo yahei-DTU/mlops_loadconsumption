@@ -134,7 +134,7 @@ Group 25
 >
 > Answer:
 
-s252605, s171204, 
+s252605, s171204, s202390, 
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -148,13 +148,11 @@ s252605, s171204,
 >
 > Answer:
 
-### Question 3
-
 Yes, we used a couple of open-source packages beyond the core course material:
 
 1. **entsoe-py**: A Python wrapper for the ENTSO-E API to automatically download hourly electricity load data for Denmark, which was critical for our data collection phase.
 
-2. **Plotly**: For interactive data visualization instead of just Matplotlib, helping us better present training results and model analysis.
+2. **Plotly (###############NOT SURE TO ADD THIS################### )**: For interactive data visualization instead of just Matplotlib, helping us better present training results and model analysis.
 
 These packages complemented the course material by enabling efficient data collection and better visualization for stakeholder communication.
 
@@ -176,7 +174,7 @@ These packages complemented the course material by enabling efficient data colle
 >
 > Answer:
 
-We managed dependencies using `uv` and maintained a `pyproject.toml` file that specifies all project dependencies with pinned versions. This approach ensures reproducibility across team members and environments.
+We used `uv` for managing our dependencies and virtual environment. We manteined a `pyproject.toml` file that specifies all project dependencies with pinned versions. This approach ensures reproducibility across team members and environments.
 
 For a new team member to get an exact copy of our environment, they would:
 
@@ -185,9 +183,9 @@ For a new team member to get an exact copy of our environment, they would:
 3. Run `uv sync` in the project root directory, which creates a virtual environment and installs all dependencies specified in `pyproject.toml` and locked in `uv.lock`
 4. Activate the environment: `source .venv/bin/activate`
 
-The `uv.lock` file ensures that exact versions of all dependencies (including transitive dependencies) are installed, preventing version conflicts or "works on my machine" issues. We also used Python 3.12+ as specified in `requires-python = ">=3.12"` in the `pyproject.toml`.
+The `uv.lock` file ensures that exact versions of all dependencies (including transitive dependencies) are installed. In case the command `uv sync` returns errors concerning the `uv.lock` file, please remove the `uv.lock` file via `rm uv.lock` and then run `uv sync`.
 
-This approach is superior to `requirements.txt` because it provides better dependency resolution and handles both main and development dependencies through dependency groups in the same file.
+We used Python 3.12+ as specified in `requires-python = ">=3.12"` in the `pyproject.toml`.
 
 ### Question 5
 
@@ -205,7 +203,7 @@ This approach is superior to `requirements.txt` because it provides better depen
 
 From the cookiecutter template, we filled out the `src/mlops_loadconsumption/` folder with `data.py`, `model.py`, `train.py`, `visualize.py`, and `api.py` modules. The `data.py` module handles data fetching from the ENTSO-E API and preprocessing. The `model.py` contains our Conv1d neural network architecture, while `train.py` implements the training pipeline with validation and early stopping. We added a `visualize.py` module for interactive plotting using Plotly, and an `api.py` module that creates a FastAPI application for model inference.
 
-We also filled out the `configs/` directory with configuration constants and the `dockerfiles/` folder with containerization files. Additionally, we set up GitHub Actions workflows in `.github/workflows/` for continuous integration.
+We also filled out the `configs/` directory with Hydra configuration files and the `dockerfiles/` folder with containerization files. Additionally, we set up GitHub Actions workflows in `.github/workflows/` for continuous integration, including unit tests, integration tests, data validation, and linting workflows.
 
 
 ### Question 6
@@ -221,7 +219,37 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 6 fill here ---
+Linting, formatting and pre-commit:
+
+* We used Ruff (version 0.1.3) for both linting and formatting, configured with a 120-character line length in `pyproject.toml`.
+
+* We set up pre-commit hooks that automatically check for trailing whitespace, YAML validation, and large files before each commit.
+
+Typing and docs:
+
+* We implemented type hints for function parameters and return types throughout the codebase.
+
+  * In `data.py`, methods include type annotations like def `__init__(self, n_input_timesteps: int, ...) -> None:`.
+
+  * In `model.py`, the forward method is annotated as `def forward(self, x: torch.Tensor) -> torch.Tensor:`.
+
+  * In `api.py`, we used Pydantic models `(PredictionRequest, PredictionResponse)` for API schema validation with type safety.
+
+* For documentation, we included docstrings for all classes and key methods.
+
+  * The `MyDataset.__init__` has comprehensive docstrings explaining all parameters with their types and purposes.
+  
+  * The `Model` class includes docstrings describing the architecture.
+  
+  * The API endpoints in `api.py` have detailed docstrings explaining functionality, arguments, and return types.
+
+These concepts are crucial in larger projects because:
+
+1. Type hints catch errors early during development and provide better IDE autocomplete support
+
+2. Ruff formatting reduces merge conflicts, making code reviews focused on logic rather than style
+
+3. Pre-commit hooks enforce quality standards automatically
 
 ## Version control
 
@@ -240,7 +268,15 @@ We also filled out the `configs/` directory with configuration constants and the
 >
 > Answer:
 
---- question 7 fill here ---
+In total, we implemented approximately 39 tests across multiple test files. We primarily tested:
+
+* Data processing (test_data.py): 22 tests covering data directory existence, raw data validation, processed data quality, and train/val/test splits integrity
+
+* Model architecture and training (test_model.py): 3 integration tests verifying that training reduces loss, the model can overfit small batches (sanity check), and gradients flow correctly through all parameters
+
+* Unit tests: 9 tests covering dataset imports, resampling logic, missing value handling, temporal encoding ranges, split size validation, sequence creation logic, holiday features, and model forward pass with gradient computation
+
+* API endpoints (test_api.py): 5 tests for the health check endpoint, valid/invalid prediction inputs, input shape validation, and response format verification
 
 ### Question 8
 
