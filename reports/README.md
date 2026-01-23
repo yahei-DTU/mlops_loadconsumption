@@ -679,7 +679,7 @@ However, there was definitely a learning curve when it came to managing the budg
 >
 > Answer:
 
---- question 28 fill here ---
+Due to time limitations, we limited this project to comply solely with the main TODOs, prioritizing the core modules and negleting the extra features.
 
 ### Question 29
 
@@ -710,7 +710,11 @@ However, there was definitely a learning curve when it came to managing the budg
 >
 > Answer:
 
---- question 30 fill here ---
+We can identify some main challenges:
+
+* **Google Cloud Platform**: its usage  was not successful on ouy end, leading to many failures in our attempts to train the model.
+
+* **ENTSOE-py API**: The api from entsoe-py had a bug that was discovered, ironically, on the submission day. The bug was related to a typo in the capitalization of the timezone for the retrieval of the electricity load data. We managed to find and correct that bug with a patch (in the first lines of data.py). After the course, we will open a PR to the entsoe-py library and make our own contribution there.
 
 ### Question 31
 
@@ -728,4 +732,24 @@ However, there was definitely a learning curve when it came to managing the budg
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- question 31 fill here ---
+* Student `s252605` contributed with:
+  * TO BE FILLED
+
+* Student `s171204` contributed with:
+  * TO BE FILLED
+
+* Student `mcsr` contributed with:
+  * Data API to fetch electricity demand data
+  * Curated the tests for the data.py script together with unit_tests
+  * General code formatting adjustments
+
+* Student `yahei` contributed with:
+  * Setting up Weights and Bias
+  * Setting up Google Cloud infrastructure
+  * Prepared the workflows
+
+* Mainly together we have:
+  * Debugged code
+  * Set up cookie cutter template
+
+While we have mostly debugged the code ourself, we have also done use of AI tools as ChatGPT and Claude for the more tedious debugging issues.
