@@ -688,9 +688,9 @@ We could not deploy the model on cloud due to authentification errors and limite
 >
 > Answer:
 
-The most expensive part was Compute Engine. Since we had our n1-standard-1 instances and those specialized Deep Learning VMs running for long stretches to train our models, the uptime costs really added up. After that, networking and the VM manager were the next biggest expenses, while Cloud Storage was the cheapest since our datasets weren't huge.
-Overall, we really liked working in the cloud. The best part was the flexibility. It was great being able to launch a powerful machine in minutes rather than needing a high-end setup at home.
-However, there was definitely a learning curve when it came to managing the budget and figuring out all the different APIs. We also found IAM pretty frustrating to deal with—it felt like every time we tried to set something up, we ran into a permission error or a binding issue. But having everything in one place and getting access to professional AI tools really helped the whole project come together in the end.
+Group member 1 used 5 dollars, and Group member 2 used 3 dollars. In total, we spent about 8 credits during the project. The most expensive part was Compute Engine. Since we had our n1-standard-1 instances and those specialized Deep Learning VMs running for long stretches to train our models, the uptime costs really added up. After that, Artifact registry was the next biggest expenses, and then networking and the VM manager, while Cloud Storage was the cheapest since our datasets weren't huge.
+Overall, we liked working in the cloud. The best part was the flexibility. It was great being able to launch a powerful machine in minutes rather than needing a high-end setup at home.
+However, there was challenging when it came to managing the budget and figuring out all the different APIs. We also found IAM pretty frustrating to deal with. It felt like every time we tried to set something up, we ran into a permission error or a binding issue. But having everything in one place and getting access to professional AI tools really helped the whole project come together in the end.
 
 ### Question 28
 
@@ -752,6 +752,9 @@ We can identify some main challenges:
 
 * **ENTSOE-py API**: The api from entsoe-py had a bug that was discovered, ironically, on the submission day. The bug was related to a typo in the capitalization of the timezone for the retrieval of the electricity load data. We managed to find and correct that bug with a patch (in the first lines of data.py). After the course, we will open a PR to the entsoe-py library and make our own contribution there.
 
+(Dong: This is what I've thought of; perhaps we can add more content about deployment or API stuff.)
+We found setting up Google Cloud to be one the most difficult parts. There are many details to pay attention to, and getting the code running requires a lot of preparation beforehand. There are always various permission issues and configuration errors, which is very time-consuming and frustrating. We would check the error messages in the Cloud logs to find the cause of the errors, and then make the necessary corrections. Sometimes, if the modified files contained errors, we would need to use Git's version control to restore to the previous state before making changes again.
+
 ### Question 31
 
 > **State the individual contributions of each team member. This is required information from DTU, because we need to**
@@ -772,7 +775,9 @@ We can identify some main challenges:
   * TO BE FILLED
 
 * Student `s171204` contributed with:
-  * TO BE FILLED
+  * Building and testing Dockerfiles locally to ensure consistent environments
+  * Implemented Hydra for configuration and hyper-parameters management
+  * Managed DVC setup by connecting it to Google Cloud Storage
 
 * Student `mcsr` contributed with:
   * Data API to fetch electricity demand data
