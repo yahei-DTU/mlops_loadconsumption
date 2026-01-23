@@ -490,7 +490,11 @@ This approach allowed us to package the exact versions of libraries like PyTorch
 >
 > Answer:
 
---- question 16 fill here ---
+Within the group we generally use two different methods for debigging:
+
+* **Jupyter interactive window**: To access this debugging method, one would simply run the filw with the option "Run in interactive window". The advantages are that the code would be ran as a jupyter notebook, making available all the variables used in the workspace. The cons is that this approach is slow in execution since one would have to wait to initialize first the jupyter kernel.
+
+* **Built-in VS Code debugger**: The main tool in VS Code. A steep learning curve at the beginning, but once some confidence has been established with this tool, it was the go-to for all group members.
 
 ## Working in the cloud
 
@@ -528,7 +532,11 @@ Identity and Access Management (IAM) is used to manage permissions and security,
 >
 > Answer:
 
-We used the Compute Engine to run our machine learning model training and data processing tasks.  We used instances with the following hardware: primarily the n1-standard-1 machine type, which provided 1 vCPU and 3.75 GB of memory. This offered a balanced, cost-effective setup for our standard tasks. For specialized AI needs, we also utilized Deep Learning VMs like my-new-deeplearning-vm, which comes pre-configured with essential drivers and frameworks like TensorFlow. We also started the instances using a custom container by pulling our Docker images from the Artifact Registry. These were run on a stable Debian 12 operating system to ensure our environment stayed perfectly consistent across development and training stages.
+We used the Compute Engine to run our machine learning model training and data processing tasks.  We used instances with the following hardware: primarily the n1-standard-1 machine type, which provided 1 vCPU and 3.75 GB of memory. 
+
+This offered a balanced, cost-effective setup for our standard tasks. For specialized AI needs, we also utilized Deep Learning VMs like my-new-deeplearning-vm, which comes pre-configured with essential drivers and frameworks like TensorFlow. 
+
+We also started the instances using a custom container by pulling our Docker images from the Artifact Registry. These were run on a stable Debian 12 operating system to ensure our environment stayed perfectly consistent across development and training stages.
 
 ### Question 19
 
@@ -653,7 +661,7 @@ To get it running, we first packaged all our code and libraries into a Docker co
 >
 > Answer:
 
-Group member 1 used ..., Group member 2 used... In total, we spent about ... credits during the project. The most expensive part was Compute Engine. Since we had our n1-standard-1 instances and those specialized Deep Learning VMs running for long stretches to train our models, the uptime costs really added up. After that, networking and the VM manager were the next biggest expenses, while Cloud Storage was the cheapest since our datasets weren't huge.
+The most expensive part was Compute Engine. Since we had our n1-standard-1 instances and those specialized Deep Learning VMs running for long stretches to train our models, the uptime costs really added up. After that, networking and the VM manager were the next biggest expenses, while Cloud Storage was the cheapest since our datasets weren't huge.
 Overall, we really liked working in the cloud. The best part was the flexibility. It was great being able to launch a powerful machine in minutes rather than needing a high-end setup at home.
 However, there was definitely a learning curve when it came to managing the budget and figuring out all the different APIs. We also found IAM pretty frustrating to deal with—it felt like every time we tried to set something up, we ran into a permission error or a binding issue. But having everything in one place and getting access to professional AI tools really helped the whole project come together in the end.
 
@@ -721,7 +729,3 @@ However, there was definitely a learning curve when it came to managing the budg
 > Answer:
 
 --- question 31 fill here ---
-
-
-
-
