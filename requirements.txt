@@ -344,7 +344,7 @@ pandas==2.3.3
     # via entsoe-py
 parso==0.8.5
     # via jedi
-pathspec==0.12.1
+pathspec==1.0.3
     # via
     #   dvc
     #   scmrepo
